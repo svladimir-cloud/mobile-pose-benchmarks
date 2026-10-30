@@ -7,10 +7,11 @@ export const RUNTIME_VERSION = '1.1.1';
 // Глаз — центральная точка (2, 5); «левый/правый» — анатомические стороны человека.
 export const COCO_FROM_BLAZEPOSE = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
 
+const local = (f) => new URL(`../../models/cache/${f}`, import.meta.url).href;
 export const MODEL_URLS = {
-  lite: 'models/cache/pose_landmarker_lite.task',
-  full: 'models/cache/pose_landmarker_full.task',
-  heavy: 'models/cache/pose_landmarker_heavy.task',
+  lite: local('pose_landmarker_lite.task'),
+  full: local('pose_landmarker_full.task'),
+  heavy: local('pose_landmarker_heavy.task'),
 };
 
 // visionUrl / wasmBase / modelUrl по умолчанию — из репозитория (стенд); страница для телефона
@@ -26,7 +27,8 @@ export async function createAdapter({ backend = 'wasm', variant = 'lite', modelU
   timings.cold_import_ms = performance.now() - t0; // загрузка JS-модуля рантайма (из кеша — если уже загружен)
   onStage('model-start');
   t0 = performance.now();
-  const resp = await fetch(modelUrl ?? MODEL_URLS[variant], { cache: 'no-store' });
+  const modelHref = modelUrl ?? MODEL_URLS[variant];
+  const resp = await fetch(modelHref, { cache: 'no-store' });
   if (!resp.ok) throw new Error(`модель: HTTP ${resp.status}`);
   const total = Number(resp.headers.get('content-length')) || 0;
   const chunks = [];
@@ -70,6 +72,8 @@ export async function createAdapter({ backend = 'wasm', variant = 'lite', modelU
     runtimeVersion: RUNTIME_VERSION,
     inputSize: '256x256',
     modelBytes: modelBuffer.byteLength,
+    modelFiles: [modelHref],
+    scoreSource: 'mean_visibility',
     coldTimings: timings,
     // image: HTMLImageElement | ImageBitmap | HTMLCanvasElement | HTMLVideoElement
     predict(image) {
@@ -79,10 +83,12 @@ export async function createAdapter({ backend = 'wasm', variant = 'lite', modelU
       const res = landmarker.detect(image); // синхронно: включает пред-/постобработку и чтение с GPU
       const inferMs = performance.now() - t;
       const lm = res.landmarks?.[0];
-      if (!lm) return { keypoints17: null, raw: null, width: w, height: h, timings: { infer_ms: inferMs } };
+      if (!lm) return { keypoints17: null, instance_score: null, raw: null, width: w, height: h, timings: { infer_ms: inferMs } };
       const raw = lm.map((p) => [p.x * w, p.y * h, p.z, p.visibility ?? null, p.presence ?? null]);
       const keypoints17 = COCO_FROM_BLAZEPOSE.map((i) => [raw[i][0], raw[i][1], raw[i][3]]);
-      return { keypoints17, raw, width: w, height: h, timings: { infer_ms: inferMs } };
+      // У BlazePose нет оценки человека: оценка экземпляра = среднее visibility по 17 точкам.
+      const instance_score = keypoints17.reduce((a, p) => a + p[2], 0) / 17;
+      return { keypoints17, instance_score, raw, width: w, height: h, timings: { infer_ms: inferMs } };
     },
     close() { landmarker.close(); },
   };

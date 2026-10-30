@@ -41,8 +41,10 @@ def to_coco_results(preds, score_mode="mean_score", swap_lr=False):
         if swap_lr:
             kp = kp[FLIP]
         flat = np.column_stack([kp[:, 0], kp[:, 1], np.ones(17)]).ravel().tolist()
+        # Оценку экземпляра даёт адаптер (instance_score: детектор / среднее по точкам), иначе — среднее score точек.
+        sc = p.get("instance_score") if score_mode == "mean_score" else None
         res.append({"image_id": p["image_id"], "category_id": 1, "keypoints": flat,
-                    "score": instance_score(kp, score_mode)})
+                    "score": float(sc) if sc is not None else instance_score(kp, score_mode)})
     return res
 
 

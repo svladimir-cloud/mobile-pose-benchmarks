@@ -71,7 +71,7 @@ def bootstrap_ap(gt_json, results, ids, n=2000, seed=0):
 
 def common_cols(r, raw_file):
     return {"run_id": r["run_id"], "date": r["date"][:10], "env": r["env"], "model": r["model"],
-            "variant": r["variant"], "runtime": r["runtime"], "runtime_version": r["runtime_version"],
+            "variant": r.get("variant", ""), "runtime": r["runtime"], "runtime_version": r["runtime_version"],
             "backend": r["backend"], "input_size": r["input_size"], "raw_file": raw_file}
 
 
@@ -101,7 +101,7 @@ def draw_worst(r, rows, gt_json, images_dir, out_dir, k=5):
         ax.scatter(p[:, 0], p[:, 1], s=14, c="#eb6834", edgecolors="white", linewidths=0.8, zorder=3)
         ax.set_title(f"{iid}: OKS={x['oks']:.2f} (зелёный — GT, оранжевый — модель)", fontsize=8)
         fig.tight_layout()
-        name = f"worst_{r['backend']}_{iid}.jpg"
+        name = f"worst_{r['model']}_{r['backend']}_{iid}.jpg"
         fig.savefig(out_dir / name); plt.close(fig)
         out.append((iid, x["oks"], x["oks_swapped"], x["num_gt_kp"], name))
     return out
@@ -111,7 +111,7 @@ def plot_kmr(curves, out_file):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    colors = ["#2a78d6", "#eb6834"]
+    colors = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#7a5cd6", "#8a6d3b"]
     fig, ax = plt.subplots(figsize=(6, 3.6), dpi=120)
     for (label, kmr, fmr), c in zip(curves, colors):
         t = M.TAUS; y = [kmr[x] * 100 for x in t]
@@ -123,7 +123,7 @@ def plot_kmr(curves, out_file):
     ax.set_xlim(0.05, 0.95); ax.set_ylim(0, 100)
     ax.grid(axis="y", color="#e5e5e5", lw=0.8); ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=False, fontsize=8, loc="upper left")
-    ax.set_title("BlazePose Lite, COCO-SinglePerson (300), env=desktop-headless", fontsize=9)
+    ax.set_title("COCO-SinglePerson, env=desktop-headless", fontsize=9)
     fig.tight_layout(); fig.savefig(out_file); plt.close(fig)
 
 
@@ -154,7 +154,7 @@ def main():
         ci = M_ci = bootstrap_ap(gt_json, res, ids, n=a.bootstrap) if a.bootstrap else (None, None)
         swaps = sum(1 for x in rows if x["detected"] and x["oks_swapped"] > x["oks"])
         acc_rows.append({**cc, "dataset": "coco-single", "n_images": len(P), **s, "PCK@0.2": pck_all,
-                         "err_median_norm": emed, "err_p95_norm": ep95, "score_source": "visibility",
+                         "err_median_norm": emed, "err_p95_norm": ep95, "score_source": r.get("score_source", "mean_visibility"),
                          "ci_low": ci[0], "ci_high": ci[1], "PCK@0.2_found": pck_found,
                          "n_pck_images": len(P) - no_l, "kmr_auc": auc, "FMR": mi["FMR"]})
         for t in M.TAUS:
@@ -175,7 +175,8 @@ def main():
                           "latency_p50_ms": p50, "latency_p95_ms": p95, **{k: r["cold"][k] for k in r["cold"]},
                           "model_size_mb": r["model_bytes"] / 1e6, "status": r["status"],
                           "gpu_renderer": e.get("webgl_renderer", "") if r["backend"] == "webgl" else ""})
-        label = {"wasm": "CPU (WASM)", "webgl": "GPU (WebGL, SwiftShader)"}.get(r["backend"], r["backend"])
+        label = f'{r["model"]} / ' + {"wasm": "CPU (WASM)", "webgl": "GPU (WebGL, SwiftShader)",
+                                       "webgpu": "GPU (WebGPU, SwiftShader)"}.get(r["backend"], r["backend"])
         curves.append((label, kmr_mean, mi["FMR"]))
         worst = draw_worst(r, rows, gt_json, a.images, img_dir)
         missed = [x["image_id"] for x in rows if not x["detected"]]

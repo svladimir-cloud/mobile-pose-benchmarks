@@ -172,14 +172,14 @@ def main():
                               "frames_total": mi["frames_total"], "frames_no_person": mi["frames_no_person"],
                               "frames_missing": round(float(np.mean(mi["frames_missing"][t])), 2),
                               "out_of_frame": int(sum(mi["out_of_frame"])), "lr_swaps": swaps})
-        e = r["browser_env"]
-        p50, p95 = M.latency_stats(r["latency_ms"])
-        perf_rows.append({**cc, "device": r["device"], "os": e.get("ua_data", {}).get("platform", ""),
-                          "browser": "HeadlessChrome", "browser_version": r["harness"]["browser_version"],
-                          "wasm_simd": e["wasm_simd"], "wasm_threads": e["wasm_threads"], "webgl2": e["webgl2"],
-                          "webgpu": e["webgpu"], "n_warmup": r["n_warmup"], "n_measure": r["n_measure"],
+        e = r.get("browser_env") or {}
+        p50, p95 = M.latency_stats(r["latency_ms"]) if r.get("latency_ms") else (None, None)
+        if r.get("latency_ms"): perf_rows.append({**cc, "device": r["device"], "os": e.get("ua_data", {}).get("platform", ""),
+                          "browser": "HeadlessChrome", "browser_version": r["harness"].get("browser_version", ""),
+                          "wasm_simd": e.get("wasm_simd"), "wasm_threads": e.get("wasm_threads"), "webgl2": e.get("webgl2"),
+                          "webgpu": e.get("webgpu"), "n_warmup": r["n_warmup"], "n_measure": r["n_measure"],
                           "latency_p50_ms": p50, "latency_p95_ms": p95, **{k: r["cold"][k] for k in r["cold"]},
-                          "model_size_mb": r["model_bytes"] / 1e6, "status": r["status"],
+                          "model_size_mb": r.get("model_bytes", 0) / 1e6, "status": r["status"],
                           "gpu_renderer": e.get("webgl_renderer", "") if r["backend"] == "webgl" else ""})
         label = f'{r["model"]} / ' + {"wasm": "CPU (WASM)", "webgl": "GPU (WebGL, SwiftShader)",
                                        "webgpu": "GPU (WebGPU, SwiftShader)"}.get(r["backend"], r["backend"])
@@ -187,8 +187,8 @@ def main():
         worst = draw_worst(r, rows, gt_json, a.images, img_dir)
         missed = [x["image_id"] for x in rows if not x["detected"]]
         summary[r["run_id"]] = {"acc": acc_rows[-1], "kmr_mean": kmr_mean, "kmr_by_kp_0.5": dict(zip(M.COCO_KP, mi["kmr"][0.5])),
-                                "perf": perf_rows[-1], "worst": worst, "swaps": swaps, "n_detected": len(P) - len(missed),
-                                "lat_min_max": [min(r["latency_ms"]), max(r["latency_ms"])]}
+                                "perf": perf_rows[-1] if r.get("latency_ms") else None, "worst": worst, "swaps": swaps, "n_detected": len(P) - len(missed),
+                                "lat_min_max": [min(r["latency_ms"]), max(r["latency_ms"])] if r.get("latency_ms") else None}
     plot_kmr(curves, img_dir / f"kmr_curve_{a.tag}.png")
     for name, cols, rows in (("accuracy", ACC, acc_rows), ("missing", MISS, miss_rows), ("perf", PERF, perf_rows)):
         with open(data_dir / f"{name}_{a.tag}_desktop-headless.csv", "w", newline="") as fh:

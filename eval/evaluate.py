@@ -143,6 +143,9 @@ def main():
     acc_rows, miss_rows, perf_rows, curves, summary = [], [], [], [], {}
     for f in a.runs:
         r = json.loads(Path(f).read_text())
+        if r.get("status") != "ok" or not r.get("predictions"):
+            print(f"пропуск {f}: {r.get('status')}", file=sys.stderr)
+            continue
         try:
             raw_file = str(Path(f).resolve().relative_to(ROOT))
         except ValueError:

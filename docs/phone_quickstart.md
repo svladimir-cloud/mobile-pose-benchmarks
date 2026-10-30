@@ -7,15 +7,16 @@
 
 ## 1. Как открыть страницу на телефоне
 
-Репозиторий приватный, поэтому GitHub Pages без платного тарифа недоступен. Варианты (любой):
+**Основной способ — GitHub Pages** (репозиторий публичный):
+1. GitHub → репозиторий `mobile-pose-benchmarks` → Settings → Pages.
+2. Source: **Deploy from a branch**; Branch: `claude/wizardly-thompson-g1vm38` (после слияния в `main` — `main`), папка `/ (root)` → Save.
+3. Через 1–2 минуты страница доступна по адресу
+   **https://svladimir-cloud.github.io/mobile-pose-benchmarks/bench/phone/dist/phone.html**
+   — откройте его на телефоне.
 
-**А. Любой статический HTTPS-хостинг (проще всего).** Скачайте `bench/phone/dist/phone.html` из ветки и загрузите на хостинг, например перетащите папку с этим файлом на https://app.netlify.com/drop — получите адрес вида `https://<имя>.netlify.app/phone.html`. Откройте его на телефоне.
-
-**Б. Ноутбук в той же Wi-Fi-сети.** В клоне репозитория:
-```bash
-HOST=0.0.0.0 PORT=8080 node bench/server.mjs
-```
-На телефоне откройте `http://<IP ноутбука>:8080/bench/phone/dist/phone.html`. (Страница по HTTP работает; рантайм и модель всё равно грузятся с CDN.)
+Запасные варианты:
+- **Любой статический HTTPS-хостинг:** скачайте `bench/phone/dist/phone.html` и перетащите папку с ним на https://app.netlify.com/drop.
+- **Ноутбук в той же Wi-Fi-сети:** в клоне репозитория `HOST=0.0.0.0 PORT=8080 node bench/server.mjs`, на телефоне — `http://<IP ноутбука>:8080/bench/phone/dist/phone.html`.
 
 Если страница пересобиралась (`node bench/phone/build.mjs`, нужны изображения в `datasets/coco/val2017/`), в CSV меняется `page_version`.
 

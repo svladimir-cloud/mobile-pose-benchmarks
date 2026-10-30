@@ -11,16 +11,16 @@
   | `storage.googleapis.com` | открыт | модели MediaPipe `.task` (200) |
   | `tfhub.dev` | открыт | редирект на GCS, `model.json` MoveNet → 200 |
   | `www.kaggle.com` | открыт | API загрузки моделей → 200 |
-  | `github.com` | **закрыт** | 403 от прокси |
+  | `github.com` | **частично** (повторно 30.10.2026 после открытия) | загрузки релизов (`/releases/download/...`) → 200; HTML-страницы чужих репозиториев → 403 (вероятно, ограничение GitHub-доступа сессии) |
   | `raw.githubusercontent.com` | открыт | 200 (не был в списке) |
   | `objects.githubusercontent.com` | открыт (TLS) | релизы не проверены — ссылки на них выдаёт github.com |
-  | `download.openmmlab.com` | **закрыт** | 403 CONNECT |
-  | `huggingface.co` | **закрыт** | 403 CONNECT |
+  | `download.openmmlab.com` | открыт (после открытия автором) | ONNX RTMPose-t → 200 |
+  | `huggingface.co` | открыт (после открытия автором) | API → 200 |
   | `cdn.jsdelivr.net` | открыт | 200 |
   | `registry.npmjs.org`, `pypi.org` | открыты | |
 
   Окружение: Node 22.22, Python 3.13, Playwright 1.63 + Chromium 153 (предустановлены).
-- **COCO-SinglePerson** (`docs/datasets.md`, `eval/select_coco_single.py`): правило R2.1 даёт **921** изображение; без условия `num_keypoints ≥ 1` — 1045 (= число у RTMPose). Подвыборка 300, seed 20261030.
+- **COCO-SinglePerson** (`docs/datasets.md`, `eval/select_coco_single.py`): правило R2.1 даёт **921** изображение (выбрано автором для статьи); без условия `num_keypoints ≥ 1` — 1045 (= число у RTMPose). Прототип — подвыборка 300, seed 20261030. Все 921 изображение скачаны, хеши — `eval/coco_single_921_sha256.txt`.
 - **Стенд** (`bench/`): страница + адаптер BlazePose (`@mediapipe/tasks-vision` 1.1.1, IMAGE), раннер Playwright, бэкенды CPU/WASM и GPU/WebGL (SwiftShader). Прогоны — `results/raw/`, журнал — `logs/runs.md`.
 - **Метрики** (`eval/`, pycocotools 2.0.11, 6 юнит-тестов): OKS-AP/AP50/AP75/AR, PCK@0,2, KMR_j(τ), FMR, p50/p95, холодный старт; бутстреп-ДИ для AP.
 - **Результаты** (`env=desktop-headless`, 300 изобр., `docs/prototype_report.md`, `data/*_prototype_desktop-headless.csv`):
@@ -38,10 +38,15 @@
   AP сопоставим с опубликованным для BlazePose Lite на COCO-SinglePerson (29,3 — RTMPose, Табл. 5). Порядок и стороны точек по Таблице 4 подтверждены (с переставленными сторонами AP = 0,002).
 - **Страница для телефона**: `bench/phone/dist/phone.html` (20 встроенных изображений, 50 + 200 замеров, «Скачать CSV/JSON»), инструкция — `docs/phone_quickstart.md`, конвертер — `eval/phone_to_perf.py`. Проверена в эмуляции Pixel 7 в headless Chromium (не замер).
 
+## Решения автора (30.10.2026)
+- Репозиторий сделан публичным → страница для телефона через GitHub Pages.
+- Выборка для статьи — 921.
+- Домены для этапа 1 открыты.
+- Полную выборку пока не прогоняем: сначала примерные числа с телефонов (прогон 921 был начат и прерван, см. `logs/runs.md`).
+
 ## Следующие шаги
-1. **Автор:** замеры на 1–2 телефонах по `docs/phone_quickstart.md` (CPU и GPU, перезагрузка страницы перед каждым запуском) → CSV в чат или в `results/raw/phone/`. Это последнее условие готовности этапа 0.
-2. **Автор:** выбрать выборку для статьи — 921 (правило R2.1) или 1045 (как у RTMPose).
-3. Прогон на полной COCO-SinglePerson (921 и 1045) → финальные CSV этапа 0/2.
-4. Статья: закрыть `TODO` о порядке выхода MediaPipe в примечании к Таблице 4 (проверено); добавить в протокол KMR среди кадров с найденным человеком (на COCO τ* по 10 % не определён, т. к. FMR > 10 %); зафиксировать пороги детекции MediaPipe.
-5. **Автор:** для этапа 1 открыть `github.com`, `download.openmmlab.com`, `huggingface.co` (RTMPose/RTMO/YOLO).
-6. Ответы автора на вопросы из `PLAN.md` (блокируют этапы 3–4).
+1. **Автор:** включить GitHub Pages (`docs/phone_quickstart.md`, разд. 1) и сделать замеры на 1–2 телефонах (CPU и GPU, перезагрузка страницы перед каждым запуском) → CSV в чат или в `results/raw/phone/`. Последнее условие готовности этапа 0.
+2. По CSV с телефонов → `data/perf_phone_prototype.csv` (`eval/phone_to_perf.py`), дополнить `docs/prototype_report.md`.
+3. Затем — по решению автора: полная выборка 921 и/или этап 1 (MoveNet, RTMPose, YOLO-Pose — доступ к весам есть).
+4. Статья: закрыть `TODO` о порядке выхода MediaPipe в примечании к Таблице 4 (проверено); добавить в протокол KMR среди кадров с найденным человеком (на COCO τ* по 10 % не определён, т. к. FMR > 10 %); зафиксировать пороги детекции MediaPipe; указать 921 изображение COCO-SinglePerson.
+5. Ответы автора на вопросы из `PLAN.md` (блокируют этапы 3–4).

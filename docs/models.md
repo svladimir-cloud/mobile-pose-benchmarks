@@ -11,6 +11,6 @@
 | yolov8n-pose / yolo11n-pose | GitHub ultralytics/assets v8.3.0 (`.pt`, COCO) → экспорт в ONNX | ONNX (opset 17) | 640×640 | 13,51 / 11,85 | **AGPL-3.0** |
 
 Замечания:
-- **RTMPose/RTMO — веса body7** (обучение на 7 наборах, включая COCO train) — это официальные ONNX OpenMMLab и выбор по умолчанию в rtmlib. В статье RTMPose (Табл. 5, COCO-SinglePerson) приведены модели, обученные только на COCO; готовых ONNX для них OpenMMLab не публикует (нужна конвертация из `.pth` через mmdeploy). `TODO(автор)`: body7 (практичный вариант) или COCO-only (прямое сравнение с публикацией).
+- **RTMPose/RTMO — веса body7** (обучение на 7 наборах, включая COCO train) — это официальные ONNX OpenMMLab и выбор по умолчанию в rtmlib. В статье RTMPose (Табл. 5, COCO-SinglePerson) приведены модели, обученные только на COCO; готовых ONNX для них OpenMMLab не публикует (нужна конвертация из `.pth` через mmdeploy). **Решение автора (30.10.2026): используем body7**; в статье оговорить, что числа RTMPose из публикации (COCO-only) напрямую не сравнимы.
 - YOLO экспортирован командой `yolo export model=<id>.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False half=False` (ultralytics 8.3.253, torch 2.15.0 с PyPI — `download.pytorch.org` из облака закрыт). Вход 320 — `TODO(автор)`.
 - MoveNet взят архивом Kaggle (TF Hub перенаправляет туда же); `model.json` + шарды.

@@ -31,7 +31,7 @@ function loadScript(src) {
 }
 
 // onStage(stage, info): 'import' | 'model-start' | 'init'.
-export async function createAdapter({ backend = 'wasm', variant = 'lightning', onStage = () => {} } = {}) {
+export async function createAdapter({ backend = 'wasm', variant = 'lightning', refine = false, onStage = () => {} } = {}) {
   if (!SIZES[variant]) throw new Error(`tfjs: неизвестный вариант ${variant}`);
   if (!['wasm', 'webgl', 'webgpu'].includes(backend)) throw new Error(`tfjs: бэкенд ${backend} не поддерживается`);
   const S = SIZES[variant];
@@ -105,12 +105,37 @@ export async function createAdapter({ backend = 'wasm', variant = 'lightning', o
       const data = await out.data(); // [1,1,17,3] = y, x, score
       out.dispose();
       const left = Math.floor(padX), top = Math.floor(padY);
-      const kp = [];
+      let kp = [];
       let sum = 0;
       for (let i = 0; i < 17; i++) {
         const y = data[i * 3], x = data[i * 3 + 1], sc = data[i * 3 + 2];
         kp.push([x * side - left, y * side - top, sc]);
         sum += sc;
+      }
+      if (refine) {
+        // Диагностика: второй проход по квадратному кропу вокруг точек первого (score >= 0,2), сторона = 1,5 * max(ш, в) рамки, не меньше 32 px.
+        const good = kp.filter((k) => k[2] >= 0.2);
+        if (good.length >= 2) {
+          const xs = good.map((k) => k[0]), ys = good.map((k) => k[1]);
+          const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+          const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+          const cs = Math.max(32, Math.max(x1 - x0, y1 - y0) * 1.5);
+          const bx = cx - cs / 2, by = cy - cs / 2;
+          const out2 = tf.tidy(() => {
+            const px = tf.browser.fromPixels(image, 3).expandDims(0).toFloat();
+            const box = tf.tensor2d([[by / (h - 1), bx / (w - 1), (by + cs) / (h - 1), (bx + cs) / (w - 1)]]);
+            const crop = tf.image.cropAndResize(px, box, [0], [S, S], 'bilinear', 0).toInt();
+            return model.execute(crop);
+          });
+          const d2 = await out2.data();
+          out2.dispose();
+          kp = []; sum = 0;
+          for (let i = 0; i < 17; i++) {
+            const y = d2[i * 3], x = d2[i * 3 + 1], sc = d2[i * 3 + 2];
+            kp.push([bx + x * cs, by + y * cs, sc]);
+            sum += sc;
+          }
+        }
       }
       return { keypoints17: kp, instance_score: sum / 17, width: w, height: h, timings: { infer_ms: performance.now() - t } };
     },

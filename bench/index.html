@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Стенд: BlazePose</title>
+</head>
+<body>
+<p id="status">Стенд готов. Управление — из раннера (window.bench).</p>
+<script type="module">
+import { createAdapter } from './adapters/mediapipe.js';
+import { probeEnv } from './env.js';
+
+let adapter = null;
+async function loadImage(url) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  return img;
+}
+window.bench = {
+  probeEnv,
+  async init(opts) {
+    adapter = await createAdapter(opts);
+    return { model: adapter.model, delegate: adapter.delegate, runtime: adapter.runtime,
+      runtimeVersion: adapter.runtimeVersion, inputSize: adapter.inputSize,
+      modelBytes: adapter.modelBytes, cold: adapter.coldTimings };
+  },
+  // Точность: по одному прогону на изображение; загрузка/декодирование — вне замера.
+  async runImages(urls, ids) {
+    const out = [];
+    for (let k = 0; k < urls.length; k++) {
+      const img = await loadImage(urls[k]);
+      const r = adapter.predict(img);
+      out.push({ image_id: ids[k], ...r });
+    }
+    return out;
+  },
+  // Первый инференс (холодный старт, этап 3) — отдельно.
+  async firstInfer(url) {
+    const img = await loadImage(url);
+    return adapter.predict(img).timings.infer_ms;
+  },
+  // Скорость: nWarmup + nMeasure вызовов по кругу на предзагруженных изображениях.
+  async runLatency(urls, nWarmup, nMeasure) {
+    const imgs = [];
+    for (const u of urls) imgs.push(await loadImage(u));
+    for (let i = 0; i < nWarmup; i++) adapter.predict(imgs[i % imgs.length]);
+    const lat = [];
+    for (let i = 0; i < nMeasure; i++) lat.push(adapter.predict(imgs[i % imgs.length]).timings.infer_ms);
+    return lat;
+  },
+};
+document.getElementById('status').dataset.ready = '1';
+</script>
+</body>
+</html>

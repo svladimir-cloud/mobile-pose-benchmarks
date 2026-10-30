@@ -1,0 +1,12 @@
+{
+  "name": "mobile-pose-benchmarks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "node bench/server.mjs",
+    "bench": "node bench/runner.mjs"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "1.1.1"
+  }
+}

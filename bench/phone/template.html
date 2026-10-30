@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Замер позы на телефоне</title>
+<style>
+  :root { --bg:#fff; --fg:#1a1a19; --muted:#666; --line:#ddd; --accent:#2a78d6; --warn:#b54708; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#1a1a19; --fg:#f0efec; --muted:#aaa; --line:#444; --accent:#3987e5; --warn:#f0a050; } }
+  body { margin:0; padding:16px; font:16px/1.4 system-ui, sans-serif; background:var(--bg); color:var(--fg); max-width:640px; }
+  h1 { font-size:20px; margin:0 0 8px; }
+  label { display:block; margin:10px 0 4px; font-size:14px; color:var(--muted); }
+  input, select { width:100%; box-sizing:border-box; font-size:16px; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--fg); }
+  .row { display:flex; gap:8px; } .row > div { flex:1; }
+  button { font-size:16px; padding:12px 14px; margin:12px 8px 0 0; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:#fff; }
+  button.secondary { background:transparent; color:var(--accent); }
+  button:disabled { opacity:.4; }
+  #status { margin-top:12px; font-weight:600; }
+  #warn { color:var(--warn); font-size:14px; }
+  table { border-collapse:collapse; margin-top:12px; font-size:14px; width:100%; }
+  td, th { border-bottom:1px solid var(--line); padding:4px 6px; text-align:left; }
+  td.n { text-align:right; font-variant-numeric:tabular-nums; }
+  progress { width:100%; height:12px; margin-top:8px; }
+  details { margin-top:16px; font-size:13px; color:var(--muted); }
+  img.preview { max-width:100%; display:none; }
+</style>
+</head>
+<body>
+<h1>BlazePose Lite: замер задержки</h1>
+<p style="font-size:14px;color:var(--muted)">50 прогревов + 200 замеров на 20 встроенных изображениях COCO. Перед запуском: телефон холодный, не на зарядке, заряд ≥ 50 %, энергосбережение выключено, другие приложения закрыты (см. docs/phone_quickstart.md).</p>
+
+<label for="device">Телефон (модель)</label>
+<input id="device" placeholder="например, Samsung Galaxy A54">
+<div class="row">
+  <div><label for="battery">Заряд, %</label><input id="battery" inputmode="numeric"></div>
+  <div><label for="temp">Температура, °C (если известна)</label><input id="temp" inputmode="decimal"></div>
+</div>
+<label for="backend">Бэкенд</label>
+<select id="backend"><option value="wasm">CPU (WASM)</option><option value="webgl">GPU (WebGL)</option></select>
+<label for="note">Заметка (браузер, условия)</label>
+<input id="note" placeholder="например, Chrome, режим полёта">
+
+<button id="run">Запустить</button>
+<button id="csv" class="secondary" disabled>Скачать CSV</button>
+<button id="json" class="secondary" disabled>Скачать JSON</button>
+<div id="status">Готово к запуску.</div>
+<div id="warn"></div>
+<progress id="prog" max="270" value="0"></progress>
+<table id="res"></table>
+<details><summary>Окружение</summary><pre id="envbox" style="white-space:pre-wrap"></pre></details>
+<details><summary>Изображения и лицензии</summary><div id="credits"></div></details>
+
+<script type="module">
+/*__ENV__*/
+/*__ADAPTER__*/
+const IMAGES = /*__IMAGES__*/;
+const PAGE_VERSION = '/*__VERSION__*/';
+const params = new URLSearchParams(location.search);
+const LOCAL = params.has('local');  // запуск с локального сервера репозитория (bench/server.mjs)
+const VISION_URL = LOCAL ? '/node_modules/@mediapipe/tasks-vision/vision_bundle.mjs'
+  : `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${RUNTIME_VERSION}/vision_bundle.mjs`;
+const WASM_BASE = LOCAL ? '/node_modules/@mediapipe/tasks-vision/wasm'
+  : `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${RUNTIME_VERSION}/wasm`;
+const MODEL_URL = LOCAL ? '/models/cache/pose_landmarker_lite.task'
+  : 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task';
+const N_WARMUP = Number(params.get('warmup') ?? 50);
+const N_MEASURE = Number(params.get('measure') ?? 200);
+
+const $ = (id) => document.getElementById(id);
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* приватный режим */ } } };
+$('device').value = store.get('device') ?? '';
+$('note').value = store.get('note') ?? '';
+$('credits').innerHTML = IMAGES.map((m) => `COCO ${m.image_id}: <a href="${m.flickr_url}">Flickr</a>, ${m.license}`).join('<br>');
+$('prog').max = IMAGES.length + N_WARMUP + N_MEASURE;
+try { const b = await navigator.getBattery?.(); if (b) $('battery').value = Math.round(b.level * 100); } catch { /* нет Battery API */ }
+
+let runsInPage = 0;
+let hiddenDuringRun = false;
+let last = null;
+document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenDuringRun = true; });
+
+async function decodeAll() {
+  const imgs = [];
+  for (const m of IMAGES) {
+    const img = new Image();
+    img.src = m.data;
+    await img.decode();
+    imgs.push(img);
+  }
+  return imgs;
+}
+const pct = (a, p) => { const s = [...a].sort((x, y) => x - y); const i = (s.length - 1) * p; const lo = Math.floor(i);
+  return s[lo] + (s[Math.min(lo + 1, s.length - 1)] - s[lo]) * (i - lo); };
+const fmt = (x) => (x == null ? '—' : x.toFixed(1));
+const tick = () => new Promise((r) => setTimeout(r, 0));
+
+$('run').onclick = async () => {
+  $('run').disabled = true; $('csv').disabled = true; $('json').disabled = true;
+  $('warn').textContent = ''; $('res').innerHTML = '';
+  store.set('device', $('device').value); store.set('note', $('note').value);
+  hiddenDuringRun = false;
+  let wake = null;
+  try { wake = await navigator.wakeLock?.request('screen'); } catch { /* нет Wake Lock */ }
+  const backend = $('backend').value;
+  runsInPage += 1;
+  const date = new Date().toISOString();
+  const rec = {
+    run_id: `${date.replace(/[-:]/g, '').slice(0, 15)}_${($('device').value || 'phone').replace(/[^\w.-]+/g, '-')}_blazepose-lite_${backend}`,
+    date, env: 'phone', page_version: PAGE_VERSION, device: $('device').value, note: $('note').value,
+    battery_pct: $('battery').value, temp_c: $('temp').value, model: 'blazepose-lite', variant: 'lite',
+    runtime: RUNTIME, runtime_version: RUNTIME_VERSION, backend, model_url: MODEL_URL, vision_url: VISION_URL,
+    n_warmup: N_WARMUP, n_measure: N_MEASURE, run_in_page: runsInPage, status: 'ok',
+  };
+  if (runsInPage > 1) $('warn').textContent = 'Не первый запуск на странице: холодный старт не холодный (рантайм уже в памяти). Для холодного старта перезагрузите страницу.';
+  try {
+    $('status').textContent = 'Окружение…';
+    rec.browser_env = await probeEnv();
+    $('envbox').textContent = JSON.stringify(rec.browser_env, null, 1);
+    $('status').textContent = 'Загрузка изображений…';
+    const imgs = await decodeAll();
+    $('status').textContent = 'Загрузка модели и рантайма…';
+    const ad = await createAdapter({ backend, variant: 'lite', modelUrl: MODEL_URL, visionUrl: VISION_URL, wasmBase: WASM_BASE });
+    rec.delegate = ad.delegate; rec.model_bytes = ad.modelBytes; rec.cold = { ...ad.coldTimings };
+    const p0 = ad.predict(imgs[0]);
+    rec.cold.first_infer_ms = p0.timings.infer_ms;
+    // Проход по 20 изображениям: точки — для сверки CPU/GPU и с настольным стендом.
+    rec.predictions = [];
+    let k = 0;
+    for (let i = 0; i < imgs.length; i++) {
+      const r = ad.predict(imgs[i]);
+      rec.predictions.push({ image_id: IMAGES[i].image_id, keypoints17: r.keypoints17, infer_ms: r.timings.infer_ms });
+      $('prog').value = ++k;
+    }
+    $('status').textContent = 'Прогрев…';
+    for (let i = 0; i < N_WARMUP; i++) { ad.predict(imgs[i % imgs.length]); $('prog').value = ++k; if (i % 10 === 9) await tick(); }
+    $('status').textContent = 'Замеры…';
+    rec.latency = [];
+    for (let i = 0; i < N_MEASURE; i++) {
+      const im = i % imgs.length;
+      const r = ad.predict(imgs[im]);
+      rec.latency.push({ i, image_id: IMAGES[im].image_id, ms: r.timings.infer_ms, detected: r.keypoints17 != null });
+      $('prog').value = ++k; if (i % 10 === 9) await tick();
+    }
+    ad.close();
+    const ms = rec.latency.map((x) => x.ms);
+    rec.summary = { latency_p50_ms: pct(ms, 0.5), latency_p95_ms: pct(ms, 0.95), latency_min_ms: Math.min(...ms),
+      latency_max_ms: Math.max(...ms), detected_of_20: rec.predictions.filter((p) => p.keypoints17).length };
+    if (hiddenDuringRun) { rec.status = 'invalid: страница уходила в фон'; $('warn').textContent = 'Страница уходила в фон во время замера — запустите заново.'; }
+    $('status').textContent = rec.status === 'ok' ? 'Готово. Скачайте CSV.' : rec.status;
+    const rows = [['Задержка p50, мс', rec.summary.latency_p50_ms], ['Задержка p95, мс', rec.summary.latency_p95_ms],
+      ['Загрузка рантайма, мс', rec.cold.cold_import_ms], ['Загрузка модели, мс', rec.cold.cold_load_ms],
+      ['Инициализация, мс', rec.cold.cold_init_ms], ['Первый инференс, мс', rec.cold.first_infer_ms]];
+    $('res').innerHTML = rows.map(([a, b]) => `<tr><td>${a}</td><td class="n">${fmt(b)}</td></tr>`).join('')
+      + `<tr><td>Человек найден</td><td class="n">${rec.summary.detected_of_20} из 20</td></tr>`
+      + `<tr><td>Бэкенд</td><td class="n">${backend} (${rec.delegate})</td></tr>`;
+  } catch (e) {
+    rec.status = `failed: ${String(e?.message ?? e).slice(0, 200)}`;
+    $('status').textContent = `Ошибка: ${rec.status}`;
+  }
+  try { await wake?.release(); } catch { /* ignore */ }
+  last = rec;
+  $('run').disabled = false; $('csv').disabled = false; $('json').disabled = false;
+};
+
+function toCsv(rec) {
+  const e = rec.browser_env ?? {};
+  const head = ['run_id', 'date', 'env', 'page_version', 'device', 'note', 'user_agent', 'model', 'variant', 'runtime',
+    'runtime_version', 'backend', 'delegate', 'wasm_simd', 'wasm_threads', 'webgl2', 'webgpu', 'webgl_renderer',
+    'hardware_concurrency', 'battery_pct', 'temp_c', 'run_in_page', 'n_warmup', 'n_measure', 'status',
+    'phase', 'i', 'image_id', 'latency_ms', 'detected'];
+  const base = [rec.run_id, rec.date, rec.env, rec.page_version, rec.device, rec.note, e.user_agent, rec.model, rec.variant,
+    rec.runtime, rec.runtime_version, rec.backend, rec.delegate, e.wasm_simd, e.wasm_threads, e.webgl2, e.webgpu,
+    e.webgl_renderer, e.hardware_concurrency, rec.battery_pct, rec.temp_c, rec.run_in_page, rec.n_warmup, rec.n_measure, rec.status];
+  const q = (v) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const lines = [head.join(',')];
+  for (const [k, v] of Object.entries(rec.cold ?? {})) lines.push([...base, k, '', '', v, ''].map(q).join(','));
+  for (const p of rec.predictions ?? []) lines.push([...base, 'pass20', '', p.image_id, p.infer_ms, p.keypoints17 != null].map(q).join(','));
+  for (const x of rec.latency ?? []) lines.push([...base, 'measure', x.i, x.image_id, x.ms, x.detected].map(q).join(','));
+  return lines.join('\n') + '\n';
+}
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+}
+$('csv').onclick = () => last && download(`${last.run_id}.csv`, toCsv(last), 'text/csv');
+$('json').onclick = () => last && download(`${last.run_id}.json`, JSON.stringify(last), 'application/json');
+window.__phone = { get last() { return last; }, toCsv };
+</script>
+</body>
+</html>

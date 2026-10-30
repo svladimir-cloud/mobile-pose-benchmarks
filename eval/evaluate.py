@@ -133,14 +133,20 @@ def main():
     ap.add_argument("--images", required=True)
     ap.add_argument("--tag", default="prototype")
     ap.add_argument("--bootstrap", type=int, default=2000)
+    ap.add_argument("--data-dir", default=str(ROOT / "data"), help="куда писать CSV (по умолчанию data/)")
+    ap.add_argument("--img-dir", default=str(ROOT / "docs/img"), help="куда писать рисунки (по умолчанию docs/img/)")
     ap.add_argument("runs", nargs="+")
     a = ap.parse_args()
     gt_json = json.loads(Path(a.gt).read_text())
-    img_dir = ROOT / "docs/img"; img_dir.mkdir(parents=True, exist_ok=True)
+    img_dir = Path(a.img_dir); img_dir.mkdir(parents=True, exist_ok=True)
+    data_dir = Path(a.data_dir); data_dir.mkdir(parents=True, exist_ok=True)
     acc_rows, miss_rows, perf_rows, curves, summary = [], [], [], [], {}
     for f in a.runs:
         r = json.loads(Path(f).read_text())
-        raw_file = str(Path(f).resolve().relative_to(ROOT))
+        try:
+            raw_file = str(Path(f).resolve().relative_to(ROOT))
+        except ValueError:
+            raw_file = str(Path(f).resolve())
         cc = common_cols(r, raw_file)
         P = r["predictions"]; ids = [p["image_id"] for p in P]
         res = M.to_coco_results(P)
@@ -185,7 +191,7 @@ def main():
                                 "lat_min_max": [min(r["latency_ms"]), max(r["latency_ms"])]}
     plot_kmr(curves, img_dir / f"kmr_curve_{a.tag}.png")
     for name, cols, rows in (("accuracy", ACC, acc_rows), ("missing", MISS, miss_rows), ("perf", PERF, perf_rows)):
-        with open(ROOT / f"data/{name}_{a.tag}_desktop-headless.csv", "w", newline="") as fh:
+        with open(data_dir / f"{name}_{a.tag}_desktop-headless.csv", "w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
             w.writeheader()
             for row in rows:

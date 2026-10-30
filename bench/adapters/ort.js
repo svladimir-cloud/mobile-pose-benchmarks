@@ -146,7 +146,6 @@ export async function createAdapter({ backend = 'wasm', variant = 'rtmpose-t', o
     executionProviders: [backend],
     numThreads: ort.env.wasm.numThreads,
     crossOriginIsolated: self.crossOriginIsolated ?? false,
-    wasmSimd: ort.env.wasm.simd ?? null,
     graphOptimizationLevel: 'all',
     ortVersion: ort.env.versions?.common ?? null,
     bundle,

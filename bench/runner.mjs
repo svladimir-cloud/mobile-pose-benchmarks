@@ -123,4 +123,7 @@ for (const [model, backend] of pairs) {
   }
   console.log(runId, status);
 }
+// keep-alive соединения браузера держат сервер — закрываем принудительно и выходим.
+server.closeAllConnections?.();
 server.close();
+process.exit(0);

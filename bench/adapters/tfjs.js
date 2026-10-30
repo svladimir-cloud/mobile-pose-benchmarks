@@ -69,14 +69,11 @@ export async function createAdapter({ backend = 'wasm', variant = 'lightning', o
     modelBytes += Number(r.headers.get('content-length')) || 0;
   }
 
-  let backendInfo = {
-    backend: tf.getBackend(),
-    flags: { WASM_HAS_SIMD_SUPPORT: tf.env().get('WASM_HAS_SIMD_SUPPORT'), WASM_HAS_MULTITHREAD_SUPPORT: tf.env().get('WASM_HAS_MULTITHREAD_SUPPORT'),
-      WEBGL_VERSION: tf.env().get('WEBGL_VERSION'), WEBGL_RENDER_FLOAT32_CAPABLE: tf.env().get('WEBGL_RENDER_FLOAT32_CAPABLE'),
-      WEBGL_FORCE_F16_TEXTURES: tf.env().get('WEBGL_FORCE_F16_TEXTURES'), WEBGPU_CPU_FORWARD: tf.env().get('WEBGPU_CPU_FORWARD') },
-  };
-  if (backend === 'wasm') backendInfo.threads = tf.env().get('WASM_HAS_MULTITHREAD_SUPPORT') ? 'multithread' : 'single';
-
+  const flag = (k) => { try { return tf.env().get(k); } catch { return undefined; } };
+  const backendInfo = { backend: tf.getBackend(), flags: {} };
+  const names = { wasm: ['WASM_HAS_SIMD_SUPPORT', 'WASM_HAS_MULTITHREAD_SUPPORT'],
+    webgl: ['WEBGL_VERSION', 'WEBGL_RENDER_FLOAT32_CAPABLE', 'WEBGL_FORCE_F16_TEXTURES'], webgpu: ['WEBGPU_CPU_FORWARD'] }[backend];
+  for (const k of names) backendInfo.flags[k] = flag(k);
 
   return {
     model: `movenet-${variant}`,

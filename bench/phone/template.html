@@ -27,6 +27,7 @@
 </head>
 <body>
 <h1>BlazePose Lite: замер задержки</h1>
+<div style="font-size:12px;color:var(--muted)">версия страницы: <span id="ver">—</span></div>
 <p style="font-size:14px;color:var(--muted)">50 прогревов + 200 замеров на 20 встроенных изображениях COCO. Перед запуском: телефон холодный, не на зарядке, заряд ≥ 50 %, энергосбережение выключено, другие приложения закрыты (см. docs/phone_quickstart.md).</p>
 
 <label for="device">Телефон (модель)</label>
@@ -43,10 +44,11 @@
 <button id="run">Запустить</button>
 <button id="csv" class="secondary" disabled>Скачать CSV</button>
 <button id="json" class="secondary" disabled>Скачать JSON</button>
-<div id="status">Готово к запуску.</div>
+<div id="status">Загрузка скрипта… (если надпись не меняется — браузер не смог выполнить скрипт страницы)</div>
 <div id="warn"></div>
 <progress id="prog" max="270" value="0"></progress>
 <table id="res"></table>
+<details open><summary>Журнал</summary><pre id="log" style="white-space:pre-wrap;font-size:12px"></pre></details>
 <details><summary>Окружение</summary><pre id="envbox" style="white-space:pre-wrap"></pre></details>
 <details><summary>Изображения и лицензии</summary><div id="credits"></div></details>
 
@@ -72,8 +74,30 @@ const store = { get(k) { try { return localStorage.getItem(k); } catch { return 
 $('device').value = store.get('device') ?? '';
 $('note').value = store.get('note') ?? '';
 $('credits').innerHTML = IMAGES.map((m) => `COCO ${m.image_id}: <a href="${m.flickr_url}">Flickr</a>, ${m.license}`).join('<br>');
-$('prog').max = IMAGES.length + N_WARMUP + N_MEASURE;
-try { const b = await navigator.getBattery?.(); if (b) $('battery').value = Math.round(b.level * 100); } catch { /* нет Battery API */ }
+const LOAD_UNITS = 100;  // доля полосы на загрузку: рантайм 5, модель до 85, инициализация 95, первый инференс 100
+$('prog').max = LOAD_UNITS + IMAGES.length + N_WARMUP + N_MEASURE;
+$('ver').textContent = PAGE_VERSION;
+const T_START = performance.now();
+function log(msg) {
+  const line = `${((performance.now() - T_START) / 1000).toFixed(1)} с  ${msg}`;
+  $('log').textContent += line + '\n';
+}
+window.addEventListener('error', (e) => log(`ошибка: ${e.message}`));
+window.addEventListener('unhandledrejection', (e) => log(`ошибка (promise): ${e.reason?.message ?? e.reason}`));
+let stageName = '', stageT0 = 0, stageTimer = null;
+function setStage(name) {
+  stageName = name; stageT0 = performance.now();
+  $('status').textContent = name;
+  log(name);
+  clearInterval(stageTimer);
+  stageTimer = setInterval(() => { $('status').textContent = `${stageName} ${((performance.now() - stageT0) / 1000).toFixed(0)} с`; }, 1000);
+}
+function stopStage(text) { clearInterval(stageTimer); $('status').textContent = text; log(text); }
+// Тайм-аут этапа загрузки (R4.4: 60 с); на медленной сети модель 5,8 МБ — даём 120 с на всю загрузку.
+const timeout = (p, ms, what) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(`тайм-аут ${ms / 1000} с: ${what}`)), ms))]);
+// Заряд — без блокировки страницы (на части браузеров getBattery не отвечает).
+Promise.resolve().then(() => timeout(navigator.getBattery(), 3000, 'battery'))
+  .then((b) => { if (b && !$('battery').value) $('battery').value = Math.round(b.level * 100); }).catch(() => {});
 
 let runsInPage = 0;
 let hiddenDuringRun = false;
@@ -114,27 +138,43 @@ $('run').onclick = async () => {
   };
   if (runsInPage > 1) $('warn').textContent = 'Не первый запуск на странице: холодный старт не холодный (рантайм уже в памяти). Для холодного старта перезагрузите страницу.';
   try {
-    $('status').textContent = 'Окружение…';
-    rec.browser_env = await probeEnv();
+    setStage('Окружение…');
+    rec.browser_env = await timeout(probeEnv(), 10000, 'окружение');
     $('envbox').textContent = JSON.stringify(rec.browser_env, null, 1);
-    $('status').textContent = 'Загрузка изображений…';
-    const imgs = await decodeAll();
-    $('status').textContent = 'Загрузка модели и рантайма…';
-    const ad = await createAdapter({ backend, variant: 'lite', modelUrl: MODEL_URL, visionUrl: VISION_URL, wasmBase: WASM_BASE });
+    setStage('Декодирование изображений…');
+    const imgs = await timeout(decodeAll(), 30000, 'изображения');
+    $('prog').value = 0;
+    const onStage = (st, info) => {
+      if (st === 'import') { setStage('Загрузка рантайма MediaPipe (cdn.jsdelivr.net)…'); }
+      else if (st === 'model-start') { $('prog').value = 5; setStage('Загрузка модели (storage.googleapis.com)…'); }
+      else if (st === 'model') {
+        const mb = (info.loaded / 1e6).toFixed(1);
+        stageName = `Загрузка модели: ${mb}${info.total ? ' из ' + (info.total / 1e6).toFixed(1) : ''} МБ…`;
+        $('prog').value = 5 + (info.total ? 80 * info.loaded / info.total : 0);
+      } else if (st === 'init') { $('prog').value = 85; setStage(`Инициализация рантайма (${backend === 'webgl' ? 'GPU' : 'CPU'})…`); }
+    };
+    const ad = await timeout(createAdapter({ backend, variant: 'lite', modelUrl: MODEL_URL, visionUrl: VISION_URL, wasmBase: WASM_BASE, onStage }),
+      120000, 'загрузка и инициализация');
+    log(`рантайм ${ad.coldTimings.cold_import_ms.toFixed(0)} мс, модель ${ad.coldTimings.cold_load_ms.toFixed(0)} мс, инициализация ${ad.coldTimings.cold_init_ms.toFixed(0)} мс`);
+    $('prog').value = 95;
+    setStage('Первый инференс…');
+    await tick();
     rec.delegate = ad.delegate; rec.model_bytes = ad.modelBytes; rec.cold = { ...ad.coldTimings };
     const p0 = ad.predict(imgs[0]);
     rec.cold.first_infer_ms = p0.timings.infer_ms;
+    log(`первый инференс ${p0.timings.infer_ms.toFixed(0)} мс`);
+    setStage('Проход по 20 изображениям…');
     // Проход по 20 изображениям: точки — для сверки CPU/GPU и с настольным стендом.
     rec.predictions = [];
-    let k = 0;
+    let k = LOAD_UNITS;
     for (let i = 0; i < imgs.length; i++) {
       const r = ad.predict(imgs[i]);
       rec.predictions.push({ image_id: IMAGES[i].image_id, keypoints17: r.keypoints17, infer_ms: r.timings.infer_ms });
-      $('prog').value = ++k;
+      $('prog').value = ++k; await tick();
     }
-    $('status').textContent = 'Прогрев…';
+    setStage('Прогрев…');
     for (let i = 0; i < N_WARMUP; i++) { ad.predict(imgs[i % imgs.length]); $('prog').value = ++k; if (i % 10 === 9) await tick(); }
-    $('status').textContent = 'Замеры…';
+    setStage('Замеры…');
     rec.latency = [];
     for (let i = 0; i < N_MEASURE; i++) {
       const im = i % imgs.length;
@@ -147,7 +187,7 @@ $('run').onclick = async () => {
     rec.summary = { latency_p50_ms: pct(ms, 0.5), latency_p95_ms: pct(ms, 0.95), latency_min_ms: Math.min(...ms),
       latency_max_ms: Math.max(...ms), detected_of_20: rec.predictions.filter((p) => p.keypoints17).length };
     if (hiddenDuringRun) { rec.status = 'invalid: страница уходила в фон'; $('warn').textContent = 'Страница уходила в фон во время замера — запустите заново.'; }
-    $('status').textContent = rec.status === 'ok' ? 'Готово. Скачайте CSV.' : rec.status;
+    stopStage(rec.status === 'ok' ? `Готово: p50 ${fmt(rec.summary.latency_p50_ms)} мс. Скачайте CSV.` : rec.status);
     const rows = [['Задержка p50, мс', rec.summary.latency_p50_ms], ['Задержка p95, мс', rec.summary.latency_p95_ms],
       ['Загрузка рантайма, мс', rec.cold.cold_import_ms], ['Загрузка модели, мс', rec.cold.cold_load_ms],
       ['Инициализация, мс', rec.cold.cold_init_ms], ['Первый инференс, мс', rec.cold.first_infer_ms]];
@@ -156,7 +196,8 @@ $('run').onclick = async () => {
       + `<tr><td>Бэкенд</td><td class="n">${backend} (${rec.delegate})</td></tr>`;
   } catch (e) {
     rec.status = `failed: ${String(e?.message ?? e).slice(0, 200)}`;
-    $('status').textContent = `Ошибка: ${rec.status}`;
+    stopStage(`Ошибка на этапе «${stageName}»: ${String(e?.message ?? e).slice(0, 200)}`);
+    rec.log = $('log').textContent;
   }
   try { await wake?.release(); } catch { /* ignore */ }
   last = rec;
@@ -187,6 +228,8 @@ function download(name, text, type) {
 $('csv').onclick = () => last && download(`${last.run_id}.csv`, toCsv(last), 'text/csv');
 $('json').onclick = () => last && download(`${last.run_id}.json`, JSON.stringify(last), 'application/json');
 window.__phone = { get last() { return last; }, toCsv };
+$('status').textContent = 'Готово к запуску.';
+log(`страница загружена, версия ${PAGE_VERSION}`);
 </script>
 </body>
 </html>

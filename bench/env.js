@@ -1,4 +1,7 @@
 // Сбор сведений об окружении браузера (R4.3, R5.1).
+// Вызовы, которые на части устройств могут зависнуть, ограничены по времени.
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+
 export async function probeEnv() {
   const env = {
     user_agent: navigator.userAgent,
@@ -8,7 +11,7 @@ export async function probeEnv() {
     screen: `${screen.width}x${screen.height}@${devicePixelRatio}`,
   };
   try {
-    const uad = await navigator.userAgentData?.getHighEntropyValues?.(['platform', 'platformVersion', 'model', 'fullVersionList']);
+    const uad = await withTimeout(navigator.userAgentData?.getHighEntropyValues?.(['platform', 'platformVersion', 'model', 'fullVersionList']) ?? Promise.resolve(null), 3000);
     if (uad) env.ua_data = uad;
   } catch (e) { /* нет в Safari/Firefox */ }
   // WASM SIMD: минимальный модуль с инструкцией v128 (из wasm-feature-detect).
@@ -28,10 +31,10 @@ export async function probeEnv() {
   env.webgpu = false;
   try {
     if (navigator.gpu) {
-      const a = await navigator.gpu.requestAdapter();
+      const a = await withTimeout(navigator.gpu.requestAdapter(), 3000);
       env.webgpu = !!a;
       if (a?.info) env.webgpu_adapter = `${a.info.vendor} ${a.info.architecture} ${a.info.description}`.trim();
     }
-  } catch (e) { /* нет WebGPU */ }
+  } catch (e) { env.webgpu_error = String(e?.message ?? e); }
   return env;
 }

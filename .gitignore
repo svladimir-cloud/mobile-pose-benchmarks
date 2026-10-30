@@ -1,0 +1,11 @@
+node_modules/
+datasets/*
+!datasets/.gitkeep
+models/cache/
+*.task
+*.onnx
+*.tflite
+*.bin
+results/raw/*.large.json
+__pycache__/
+.venv/

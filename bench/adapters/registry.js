@@ -14,7 +14,8 @@ export const REGISTRY = {
   'blazepose-heavy': { module: './mediapipe.js', options: { variant: 'heavy' }, backends: ['wasm', 'webgl'] },
   'movenet-lightning': { module: './tfjs.js', options: { variant: 'lightning' }, backends: ['wasm', 'webgl', 'webgpu'] },
   'movenet-thunder': { module: './tfjs.js', options: { variant: 'thunder' }, backends: ['wasm', 'webgl', 'webgpu'] },
-  // Диагностика расхождения AP с публикацией: второй проход по кропу вокруг точек первого (не основной протокол).
+  // MoveNet, два прохода: второй — по кропу вокруг точек первого. В статье на COCO — рядом с однопроходным
+  // (сопоставимость с публикацией RTMPose, Табл. 5); решение автора 31.10.2026.
   'movenet-lightning-refine': { module: './tfjs.js', options: { variant: 'lightning', refine: true }, backends: ['wasm'] },
   'movenet-thunder-refine': { module: './tfjs.js', options: { variant: 'thunder', refine: true }, backends: ['wasm'] },
   'rtmpose-t': { module: './ort.js', options: { variant: 'rtmpose-t' }, backends: ['wasm', 'webgpu'] },

@@ -1,0 +1,258 @@
+{
+ "generated": "2026-10-30",
+ "note": "файлы — в models/cache/ (не в git); пути относительно models/cache/",
+ "models": [
+  {
+   "id": "blazepose-lite",
+   "family": "BlazePose (MediaPipe Pose Landmarker) Lite",
+   "license": "Apache-2.0",
+   "input": "256x256",
+   "runtime": "@mediapipe/tasks-vision 1.1.1",
+   "conversion": "нет (официальный .task)",
+   "files": [
+    {
+     "path": "pose_landmarker_lite.task",
+     "source_url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task",
+     "note": "float16",
+     "downloaded": "2026-10-30",
+     "bytes": 5777746,
+     "sha256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a"
+    }
+   ],
+   "total_mb": 5.778
+  },
+  {
+   "id": "blazepose-full",
+   "family": "BlazePose Full",
+   "license": "Apache-2.0",
+   "input": "256x256",
+   "runtime": "@mediapipe/tasks-vision 1.1.1",
+   "conversion": "нет (официальный .task)",
+   "files": [
+    {
+     "path": "pose_landmarker_full.task",
+     "source_url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task",
+     "note": "float16",
+     "downloaded": "2026-10-30",
+     "bytes": 9398198,
+     "sha256": "4eaa5eb7a98365221087693fcc286334cf0858e2eb6e15b506aa4a7ecdcec4ad"
+    }
+   ],
+   "total_mb": 9.398
+  },
+  {
+   "id": "blazepose-heavy",
+   "family": "BlazePose Heavy",
+   "license": "Apache-2.0",
+   "input": "256x256",
+   "runtime": "@mediapipe/tasks-vision 1.1.1",
+   "conversion": "нет (официальный .task)",
+   "files": [
+    {
+     "path": "pose_landmarker_heavy.task",
+     "source_url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task",
+     "note": "float16",
+     "downloaded": "2026-10-30",
+     "bytes": 30664242,
+     "sha256": "64437af838a65d18e5ba7a0d39b465540069bc8aae8308de3e318aad31fcbc7b"
+    }
+   ],
+   "total_mb": 30.664
+  },
+  {
+   "id": "movenet-lightning",
+   "family": "MoveNet SinglePose Lightning v4 (TF.js)",
+   "license": "Apache-2.0",
+   "input": "192x192",
+   "runtime": "TF.js",
+   "conversion": "нет (официальная TF.js-модель)",
+   "files": [
+    {
+     "path": "tfjs/movenet-lightning/model.json",
+     "source_url": "https://www.kaggle.com/api/v1/models/google/movenet/tfJs/singlepose-lightning/4/download",
+     "note": "архив Kaggle (= tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4)",
+     "downloaded": "2026-10-30",
+     "bytes": 168013,
+     "sha256": "c65a3447162efa0c42af29498a4b151f4415b36ff3ae6fae2b28a32e840dcbfb"
+    },
+    {
+     "path": "tfjs/movenet-lightning/group1-shard1of2.bin",
+     "source_url": "https://www.kaggle.com/api/v1/models/google/movenet/tfJs/singlepose-lightning/4/download",
+     "note": "архив Kaggle (= tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4)",
+     "downloaded": "2026-10-30",
+     "bytes": 4194304,
+     "sha256": "b42c3232bf13b0efc691d3f0693dd3fc74404f709b1deee0a271828af6dbbea2"
+    },
+    {
+     "path": "tfjs/movenet-lightning/group1-shard2of2.bin",
+     "source_url": "https://www.kaggle.com/api/v1/models/google/movenet/tfJs/singlepose-lightning/4/download",
+     "note": "архив Kaggle (= tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4)",
+     "downloaded": "2026-10-30",
+     "bytes": 455912,
+     "sha256": "8253ab965aa3122c08f331777ca395ce9ca19bb9e7cb278b99de1c46dbdeb6dc"
+    }
+   ],
+   "total_mb": 4.818
+  },
+  {
+   "id": "movenet-thunder",
+   "family": "MoveNet SinglePose Thunder v4 (TF.js)",
+   "license": "Apache-2.0",
+   "input": "256x256",
+   "runtime": "TF.js",
+   "conversion": "нет (официальная TF.js-модель)",
+   "files": [
+    {
+     "path": "tfjs/movenet-thunder/model.json",
+     "source_url": "https://www.kaggle.com/api/v1/models/google/movenet/tfJs/singlepose-thunder/4/download",
+     "note": "архив Kaggle (= tfhub.dev/google/tfjs-model/movenet/singlepose/thunder/4)",
+     "downloaded": "2026-10-30",
+     "bytes": 168151,
+     "sha256": "957721af760b24a1abc93ce5d42caf0cb7795723ab873d3791f5f42f5cb8c7ca"
+    },
+    {
+     "path": "tfjs/movenet-thunder/group1-shard1of3.bin",
+     "source_url": "https://www.kaggle.com/api/v1/models/google/movenet/tfJs/singlepose-thunder/4/download",
+     "note": "архив Kaggle (= tfhub.dev/google/tfjs-model/movenet/singlepose/thunder/4)",
+     "downloaded": "2026-10-30",
+     "bytes": 4194304,
+     "sha256": "58dd47fd600a4849c342ce14e2ec32102744ca3d5f7fd9e6888d284f7f922cba"
+    },
+    {
+     "path": "tfjs/movenet-thunder/group1-shard2of3.bin",
+     "source_url": "https://www.kaggle.com/api/v1/models/google/movenet/tfJs/singlepose-thunder/4/download",
+     "note": "архив Kaggle (= tfhub.dev/google/tfjs-model/movenet/singlepose/thunder/4)",
+     "downloaded": "2026-10-30",
+     "bytes": 4194304,
+     "sha256": "08da980bc00886854f29b49b9c14528cd41626c0498c67b450de394713f1d0bc"
+    },
+    {
+     "path": "tfjs/movenet-thunder/group1-shard3of3.bin",
+     "source_url": "https://www.kaggle.com/api/v1/models/google/movenet/tfJs/singlepose-thunder/4/download",
+     "note": "архив Kaggle (= tfhub.dev/google/tfjs-model/movenet/singlepose/thunder/4)",
+     "downloaded": "2026-10-30",
+     "bytes": 4088504,
+     "sha256": "c1c6b712e33456aa95aa556b6425528d04fe8730ce9b92de38ec58e947fede34"
+    }
+   ],
+   "total_mb": 12.645
+  },
+  {
+   "id": "rtmpose-t",
+   "family": "RTMPose-t (SimCC, body7) + RTMDet-nano",
+   "license": "Apache-2.0",
+   "input": "256x192 (детектор 320x320)",
+   "runtime": "onnxruntime-web",
+   "conversion": "нет (официальный ONNX OpenMMLab, mmdeploy)",
+   "files": [
+    {
+     "path": "onnx/rtmpose-t.onnx",
+     "source_url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-t_simcc-body7_pt-body7_420e-256x192-026a1439_20230504.zip",
+     "note": "end2end.onnx из архива",
+     "downloaded": "2026-10-30",
+     "bytes": 13350364,
+     "sha256": "a6c2f6a3896a4d51131d14d7a80a3d08b50f559af5a58a45d5b098aef510a70f"
+    },
+    {
+     "path": "onnx/rtmdet-nano.onnx",
+     "source_url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmdet_nano_8xb32-100e_coco-obj365-person-05d8511e.zip",
+     "note": "end2end.onnx из архива, NMS внутри",
+     "downloaded": "2026-10-30",
+     "bytes": 4010667,
+     "sha256": "8297e829ccc5590c8e2d32d5a211f322a0585fb7467eec85eb12c9525b0b95d6"
+    }
+   ],
+   "total_mb": 17.361
+  },
+  {
+   "id": "rtmpose-s",
+   "family": "RTMPose-s (SimCC, body7) + RTMDet-nano",
+   "license": "Apache-2.0",
+   "input": "256x192 (детектор 320x320)",
+   "runtime": "onnxruntime-web",
+   "conversion": "нет (официальный ONNX OpenMMLab, mmdeploy)",
+   "files": [
+    {
+     "path": "onnx/rtmpose-s.onnx",
+     "source_url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-s_simcc-body7_pt-body7_420e-256x192-acd4a1ef_20230504.zip",
+     "note": "end2end.onnx из архива",
+     "downloaded": "2026-10-30",
+     "bytes": 21890172,
+     "sha256": "9aeb635b83f86aea45cf45d85798f7eba1a162de8e0d721c44e54fe5eebaf47d"
+    },
+    {
+     "path": "onnx/rtmdet-nano.onnx",
+     "source_url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmdet_nano_8xb32-100e_coco-obj365-person-05d8511e.zip",
+     "note": "end2end.onnx из архива, NMS внутри",
+     "downloaded": "2026-10-30",
+     "bytes": 4010667,
+     "sha256": "8297e829ccc5590c8e2d32d5a211f322a0585fb7467eec85eb12c9525b0b95d6"
+    }
+   ],
+   "total_mb": 25.901
+  },
+  {
+   "id": "rtmo-s",
+   "family": "RTMO-s (одноэтапная, body7)",
+   "license": "Apache-2.0",
+   "input": "640x640",
+   "runtime": "onnxruntime-web",
+   "conversion": "нет (официальный ONNX OpenMMLab, mmdeploy)",
+   "files": [
+    {
+     "path": "onnx/rtmo-s.onnx",
+     "source_url": "https://download.openmmlab.com/mmpose/v1/projects/rtmo/onnx_sdk/rtmo-s_8xb32-600e_body7-640x640-dac2bf74_20231211.zip",
+     "note": "end2end.onnx из архива, NMS внутри",
+     "downloaded": "2026-10-30",
+     "bytes": 39617685,
+     "sha256": "d0703d40d19f3921da51ae725402d5fdae4d2478c7442072d3101bd396f370d8"
+    }
+   ],
+   "total_mb": 39.618
+  },
+  {
+   "id": "yolov8n-pose",
+   "family": "YOLOv8n-pose (Ultralytics, COCO)",
+   "license": "AGPL-3.0",
+   "input": "640x640",
+   "runtime": "onnxruntime-web",
+   "conversion": "ultralytics 8.3.253, torch 2.15.0 (PyPI), onnx 1.23.2, onnxslim 0.1.98: yolo export model=<id>.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False half=False",
+   "files": [
+    {
+     "path": "onnx/yolov8n-pose.onnx",
+     "source_url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt",
+     "note": "экспорт из .pt",
+     "downloaded": "2026-10-30",
+     "bytes": 13514558,
+     "sha256": "4e4cf26bcc8eccb03ce8cda6074d6c159a9d03dec3142637881516b33469fd81"
+    }
+   ],
+   "pt_file": "dl/yolov8n-pose.pt",
+   "pt_bytes": 6832633,
+   "pt_sha256": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212",
+   "total_mb": 13.515
+  },
+  {
+   "id": "yolo11n-pose",
+   "family": "YOLO11n-pose (Ultralytics, COCO)",
+   "license": "AGPL-3.0",
+   "input": "640x640",
+   "runtime": "onnxruntime-web",
+   "conversion": "ultralytics 8.3.253, torch 2.15.0 (PyPI), onnx 1.23.2, onnxslim 0.1.98: yolo export model=<id>.pt format=onnx imgsz=640 opset=17 simplify=True dynamic=False half=False",
+   "files": [
+    {
+     "path": "onnx/yolo11n-pose.onnx",
+     "source_url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n-pose.pt",
+     "note": "экспорт из .pt",
+     "downloaded": "2026-10-30",
+     "bytes": 11853450,
+     "sha256": "ad2ee93ce75056d85e6b922e80f4ece9a188c28d1d44f494e133561d8e8017fb"
+    }
+   ],
+   "pt_file": "dl/yolo11n-pose.pt",
+   "pt_bytes": 6255593,
+   "pt_sha256": "869e83fcdffdc7371fa4e34cd8e51c838cc729571d1635e5141e3075e9319dc0",
+   "total_mb": 11.853
+  }
+ ]
+}

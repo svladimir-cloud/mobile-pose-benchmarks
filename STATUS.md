@@ -1,6 +1,6 @@
-# Состояние — 30.10.2026
+# Состояние — 24.11.2026
 
-Ветка работы: `claude/wizardly-thompson-g1vm38` (ветка `ccr-00c41dd7-kbg0lj` уже влита в `main` через PR #1).
+Этапы 0–1 влиты в `main` (PR #2, 24.11.2026). Сверка R1.5 для RTMPose/RTMO/MoveNet — ветка `claude/r15-rtmpose-movenet`.
 
 ## Сделано — этап 0 (прототип), кроме замеров на телефонах
 - **Доступ к доменам** (проверка 30.10.2026, `curl` через прокси среды):
@@ -51,7 +51,7 @@
 - 10 моделей (BlazePose Lite/Full/Heavy, MoveNet Lightning/Thunder, RTMPose-t/-s + RTMDet-nano, RTMO-s, YOLOv8n/11n-pose) работают в браузере: MediaPipe Tasks, TF.js 4.22.0, onnxruntime-web 1.30.0 (`bench/adapters/`, `models/manifest.json`, `docs/models.md`).
 - Матрица на 300 изобр. (WASM — все; WebGL — BlazePose, MoveNet), 17 прогонов → `data/*_stage1_desktop-headless.csv`, отчёт `docs/stage1_report.md`.
 - AP (WASM): RTMO-s 0,755; RTMPose-s 0,701; RTMPose-t 0,639; YOLOv8n 0,587; YOLO11n 0,550; MoveNet Thunder 0,485 (2 прохода 0,645); BlazePose Heavy 0,433; Full 0,375; MoveNet Lightning 0,340 (2 прохода 0,526); BlazePose Lite 0,311.
-- Сверка с эталоном: BlazePose (MediaPipe Python) и YOLOv8n (ultralytics) — сделана; MoveNet, RTMPose — TODO.
+- Сверка с эталоном (R1.5): BlazePose (MediaPipe Python) и YOLOv8n (ultralytics) — 30.10.2026; RTMPose-t/-s, RTMO-s (rtmlib) и MoveNet Lightning/Thunder (TF Python) — 24.11.2026 на ПК автора: разница AP браузер − эталон +0,1…+0,6 п., порядок каналов RTMPose — RGB (BGR −1…−3 п. AP). Подробно — `docs/stage1_report.md`, разд. 3.
 - WebGPU в облаке (SwiftShader) — непригоден для замеров (секунды на кадр), мерить на телефоне.
 
 ## Решения автора (30.10.2026)
@@ -63,9 +63,9 @@
 - Полную выборку пока не прогоняем: сначала примерные числа с телефонов (прогон 921 был начат и прерван, см. `logs/runs.md`).
 
 ## Следующие шаги
-0. **24.11.2026:** план обновлён после разбора `lfk-bench` и записей автора (наборы А/Б) — `PLAN.md`, раздел «Обновление плана — 24.11.2026»; разбор — `docs/lfk_bench_review.md`. Порядок: влить ветку в `main` → R1.5 для RTMPose/RTMO/MoveNet → страница телефона для всех моделей → видеорежим стенда → пилот этапа 3 на записях А/Б с метрикой по задаче.
-1. **Автор:** YOLO/RTMO — добавлять ли вход 320; что делать дальше (страница телефона для всех моделей / сверка с эталоном / выборка 921).
-2. Сверка с эталоном для MoveNet (TF Python) и RTMPose/RTMO (rtmlib) — закрыть R1.5; проверить RGB/BGR у RTMPose на 300 изобр.
+0. **24.11.2026:** план обновлён после разбора `lfk-bench` и записей автора (наборы А/Б) — `PLAN.md`, раздел «Обновление плана — 24.11.2026»; разбор — `docs/lfk_bench_review.md`. Порядок: ~~влить ветку в `main`~~ → ~~R1.5 для RTMPose/RTMO/MoveNet~~ → страница телефона для всех моделей → видеорежим стенда → пилот этапа 3 на записях А/Б с метрикой по задаче.
+1. **Автор:** YOLO/RTMO — добавлять ли вход 320.
+2. ~~Сверка с эталоном для MoveNet и RTMPose/RTMO~~ — сделано 24.11.2026. Остаток (по желанию): YOLO11n-pose и BlazePose Full/Heavy — те же адаптеры, что уже сверены.
 3. Страница телефона для всех моделей (этап 4): выбор модели и бэкенда, кеш моделей, WebGPU; заодно исправить скачивание CSV в Яндекс Браузере (если автор захочет).
 4. Этап 2: прогон всей выборки 921 для всех моделей (в облаке на WASM ≈ 1,5–2 ч последовательно).
 5. Статья: закрыть `TODO` о порядке выхода MediaPipe (Таблица 4); оговорить веса body7; KMR среди найденных; пороги детекции.

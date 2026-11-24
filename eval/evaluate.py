@@ -194,7 +194,7 @@ def main():
                                 "lat_min_max": [min(r["latency_ms"]), max(r["latency_ms"])] if r.get("latency_ms") else None}
     plot_kmr(curves, img_dir / f"kmr_curve_{a.tag}.png")
     for name, cols, rows in (("accuracy", ACC, acc_rows), ("missing", MISS, miss_rows), ("perf", PERF, perf_rows)):
-        with open(data_dir / f"{name}_{a.tag}_desktop-headless.csv", "w", newline="") as fh:
+        with open(data_dir / f"{name}_{a.tag}_desktop-headless.csv", "w", newline="", encoding="utf-8") as fh:
             w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
             w.writeheader()
             for row in rows:

@@ -14,3 +14,13 @@
 - Эталон: `results/raw/20261030-134527_python-ref_blazepose-lite_python-cpu.json` — 81 из 300 без человека; AP 0,317, AP50 0,568, AR 0,365, PCK@0,2 0,668 (браузер WASM: 80 без человека, AP 0,311).
 - Браузер WASM ↔ Python: оба нашли человека на 217, только браузер — 3, только Python — 2; расхождение координат: медиана 0,007 px, среднее 2,6 px, p95 6,9 px; изображений с макс. расхождением > 10 px — 29.
 - Браузер WebGL (SwiftShader) ↔ Python: оба — 205, только браузер — 6, только Python — 14; медиана 4,1 px, среднее 11,3 px, p95 41,4 px; изображений с > 10 px — 158. Расхождение GPU-делегата — заметно больше, чем у WASM; проверить на реальном GPU телефона.
+
+## 24.11.2026 — сверка браузер ↔ Python (R1.5): RTMPose-t/-s, RTMO-s, MoveNet
+- Окружение: ПК автора, Windows 10, Python 3.10.10, CPU; версии — `eval/requirements-reference.txt`. ONNX — хеши совпадают с `models/manifest.json`; MoveNet — SavedModel TF2 с Kaggle (`google/movenet/tensorFlow2/singlepose-{lightning,thunder}/4`); изображения — хеши совпадают с `eval/coco_single_sub300_sha256.txt`.
+- `eval/reference_rtmlib.py`: предобработка и декодирование из rtmlib; один экземпляр с максимальной оценкой (RTMDet ≥ 0,3, RTMO ≥ 0,1), детектор 320×320 — как в `bench/adapters/ort.js`; `--pose-input rgb|bgr`.
+- `eval/reference_movenet.py`: предобработка как в `bench/adapters/tfjs.js` (pad до квадрата, `resize_bilinear` с семантикой tf.js, `toInt`).
+- Прогоны: `results/raw/20261124-python-ref_*.json` (7 шт.), сравнение — `eval/compare_runs.py`, AP — `eval/evaluate.py --bootstrap 0` (CSV в рабочий каталог, не в `data/`).
+- AP браузер / эталон: RTMPose-t 0,639 / 0,637 (BGR 0,608); RTMPose-s 0,701 / 0,695 (BGR 0,684); RTMO-s 0,755 / 0,754; MoveNet Lightning 0,340 / 0,339; Thunder 0,485 / 0,481.
+- Расхождение точек (медиана / среднее / p95, px): RTMPose-t 1,49 / 8,6 / 29,1; RTMPose-s 1,39 / 8,5 / 32,9; RTMO-s 0,0001 / 0,53 / 2,2; Lightning 0,27 / 2,7 / 10,2; Thunder 0,11 / 2,4 / 7,3. Сдвиг по близким точкам (|Δ| < 5 px): RTMPose ≈ −0,2 px, остальные ≈ 0.
+- Порядок каналов RTMPose — RGB подтверждён на 300. rtmlib по умолчанию подаёт BGR — занижает AP на 1–3 п.
+- Исправлено: `eval/evaluate.py` писал CSV в кодировке системы (на Windows — cp1251) — теперь UTF-8, как требует `data/README.md`.

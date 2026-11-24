@@ -1,0 +1,9 @@
+# Эталонные прогоны для сверки R1.5 (eval/reference_rtmlib.py, eval/reference_movenet.py).
+# Проверено 24.11.2026: Windows 10, Python 3.10.10, CPU.
+# rtmlib ставить с --no-deps (иначе тянет opencv-python другой версии):
+#   pip install -r eval/requirements-reference.txt && pip install --no-deps rtmlib==0.0.16
+onnxruntime==1.23.2
+tensorflow==2.21.0
+opencv-python==4.12.0.88
+numpy==2.2.6
+pycocotools==2.0.11

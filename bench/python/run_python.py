@@ -181,6 +181,7 @@ class MediaPipe:
         self.mp, self.vision = mp, vision
         task = next((CACHE / mid).glob("*.task"))
         self.image_mode = image_mode
+        self.lm = None
         self.opts = vision.PoseLandmarkerOptions(
             base_options=BaseOptions(model_asset_path=str(task), delegate=BaseOptions.Delegate.CPU),
             running_mode=vision.RunningMode.IMAGE if image_mode else vision.RunningMode.VIDEO,
@@ -189,6 +190,11 @@ class MediaPipe:
         self.reset()
 
     def reset(self):
+        # IMAGE-режим без трекинга — пересоздавать не нужно; VIDEO — новый трекер
+        if self.lm is not None and self.image_mode:
+            return
+        if self.lm is not None:
+            self.lm.close()
         self.lm = self.vision.PoseLandmarker.create_from_options(self.opts)
         self.ts = 0
 

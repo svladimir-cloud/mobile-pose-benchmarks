@@ -17,3 +17,4 @@
 | 2026-11-27T04:41:15 | 20261127-044115-1nmw | yolo11n-pose | wasm | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044115_cloud-headless_yolo11n-pose_wasm_images.json | ok |
 | 2026-11-27T04:43:05 | 20261127-044305-jw8z | yolov8n-pose | wasm | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044305_cloud-headless_yolov8n-pose_wasm_images.json | ok |
 | 2026-11-27T04:44:58 | 20261127-044458-0s36 | movenet-thunder | wasm | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044458_cloud-headless_movenet-thunder_wasm_images.json | ok |
+| 2026-11-27T04:45:22 | 20261127-044522-k4hl | mediapipe-full | cpu | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044522_cloud-headless_mediapipe-full_cpu_images.json | ok |

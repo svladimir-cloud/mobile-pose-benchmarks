@@ -110,6 +110,7 @@ def main() -> None:
     ap.add_argument("--only", nargs="*", help="id моделей")
     ap.add_argument("--role", choices=["browser", "detector", "reference", "all"], default="all")
     ap.add_argument("--skip-yolo", action="store_true")
+    ap.add_argument("--skip-reference", action="store_true", help="без эталонных моделей (RTMPose-x, YOLOX-m)")
     a = ap.parse_args()
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
@@ -121,6 +122,8 @@ def main() -> None:
         if a.role != "all" and m["role"] != a.role:
             continue
         if a.skip_yolo and "export" in m:
+            continue
+        if a.skip_reference and m["role"] == "reference":
             continue
         out_dir = CACHE / m["id"]
         out_dir.mkdir(parents=True, exist_ok=True)

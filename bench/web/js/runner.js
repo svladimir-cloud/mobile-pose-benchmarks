@@ -1,7 +1,7 @@
 // Цикл замера одной конфигурации «модель × бэкенд × источник» (R3.4, R4.4, R5.1).
 import { createAdapter } from "./models.js";
 import { heapMb, readBattery } from "./caps.js";
-import { Loader, SKELETON, now, round, sleep, srcSize, summarize } from "./util.js";
+import { Loader, SKELETON, abs, now, round, sleep, srcSize, summarize } from "./util.js";
 
 // Тайм-ауты: загрузка+инициализация 60 с (R4.4), один кадр 30 с. Зависшая конфигурация -> status=failed,
 // матрица продолжается со следующей.
@@ -33,7 +33,7 @@ export class VideoSource {
       v.srcObject = stream;
       this.facing = facing || "user";
     } else {
-      v.src = url; v.loop = true;
+      v.src = abs(url); v.loop = true;
     }
     v.muted = true; v.playsInline = true;
     await v.play();
@@ -244,8 +244,8 @@ export async function runFrames(ctx, model, backend, set, params, ui) {
   doc.params = { ...params };
   let adapter = null;
   try {
-    const meta = await (await fetch(set.url)).json();
-    const base = set.url.replace(/frames\.json$/, "");
+    const meta = await (await fetch(abs(set.url))).json();
+    const base = abs(set.url.replace(/frames\.json$/, ""));
     const files = meta.files.slice(0, params.max_frames || meta.files.length);
     doc.source = { kind: "frames", name: set.name, width: meta.width, height: meta.height, fps: meta.fps, facing: null };
     let next = loadImage(base + files[0]);
@@ -280,13 +280,13 @@ export async function runImages(ctx, model, backend, items, params, ui) {
   doc.source = { kind: "images", name: "coco-single", width: null, height: null, fps: null, facing: null };
   let adapter = null;
   try {
-    let next = loadImage("/coco/" + items[0].file_name);
+    let next = loadImage(abs("coco/" + items[0].file_name));
     const first = await next;
     adapter = await setupAdapter(ctx, doc, model, backend, { mode: "image", detInterval: 1 }, first);
     const preds = [], lat = [];
     for (let i = 0; i < items.length; i++) {
       const im = i === 0 ? first : await next;
-      if (i + 1 < items.length) next = loadImage("/coco/" + items[i + 1].file_name);
+      if (i + 1 < items.length) next = loadImage(abs("coco/" + items[i + 1].file_name));
       adapter.reset();
       const t0 = now();
       const r = await withTimeout(adapter.estimate(im, now()), FRAME_TIMEOUT_MS, "изображение");

@@ -87,3 +87,22 @@ rsync -av user@server:/opt/mpb/results/raw/ results/raw/
 - Сервер принимает только JSON в формате `mpb-result/*`, не больше 64 МБ. Пути к файлам не выходят за `bench/web`, `models/cache`, `datasets/media`, `datasets/coco/val2017`.
 - Видео с камеры участников на сервер не передаётся. В режиме видео передаются координаты точек тестового ролика.
 - Если ссылка станет публичной, стоит закрыть страницу паролем (в Caddy — `basicauth`).
+
+# Вариант без сервера: GitHub Pages
+
+Адрес: **https://svladimir-cloud.github.io/mobile-pose-benchmarks/** (репозиторий публичный, Pages бесплатен).
+
+Сайт собирает GitHub Actions (`.github/workflows/pages.yml`): `npm ci && npm run vendor`, скачивание весов и экспорт YOLO (`models/fetch_models.py --skip-reference`), сборка `tools/build_site.py` → `_site/`. Веса в git не попадают.
+
+Отличия от своего сервера:
+- **Заголовки изоляции** (многопоточный WASM) добавляет service worker (`bench/web/coi-sw.js`); при первом открытии страница один раз перезагружается.
+- **Результаты не уходят на сервер автоматически**: они сохраняются в браузере телефона; участник нажимает «Поделиться» (мессенджер, почта) или «Скачать» и присылает JSON. Полученные файлы кладутся в `results/raw/` (файл-массив разбирается `eval/` как есть или раскладывается по одному результату).
+- **Видео для режима «видео»** берутся из `bench/media/` (коммитятся в репозиторий; только свои записи с согласием, mp4 H.264, до ~20 МБ). Без них доступна только камера.
+- `from_cache` в холодном старте не определяется (через service worker Resource Timing не отличает кэш от сети).
+
+Включение (один раз, владелец репозитория):
+1. Settings → Pages → Build and deployment → Source: **GitHub Actions**.
+2. Settings → Environments → `github-pages` → Deployment branches: добавить `claude/sleepy-hopper-ycca7l` (или влить ветку в `main`).
+3. Actions → `pages` → Run workflow (или любой push в `bench/`). Сборка ≈ 5–10 мин.
+
+Ссылка с автозапуском для участников: `https://svladimir-cloud.github.io/mobile-pose-benchmarks/?auto=1&mode=quick&source=video:media/squat01.mp4`.

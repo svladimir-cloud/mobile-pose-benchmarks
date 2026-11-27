@@ -92,17 +92,18 @@ def ensure_cert(ips: list[str]) -> tuple[Path, Path]:
     return crt, key
 
 
-def list_media() -> list[dict]:
+def list_media(media: Path | None = None) -> list[dict]:
     """Видео в datasets/media + наборы кадров datasets/media/<клип>/frames (после tools/extract_frames.py)."""
+    media = media or MEDIA
     out = []
-    if not MEDIA.exists():
+    if not media.exists():
         return out
-    for p in sorted(MEDIA.iterdir()):
+    for p in sorted(media.iterdir()):
         if p.is_file() and p.suffix.lower() in VIDEO_EXT:
-            out.append({"kind": "video", "name": p.stem, "url": f"/media/{p.name}", "bytes": p.stat().st_size})
+            out.append({"kind": "video", "name": p.stem, "url": f"media/{p.name}", "bytes": p.stat().st_size})
         elif p.is_dir() and (p / "frames.json").exists():
             meta = json.loads((p / "frames.json").read_text(encoding="utf-8"))
-            out.append({"kind": "frames", "name": p.name, "url": f"/media/{p.name}/frames.json",
+            out.append({"kind": "frames", "name": p.name, "url": f"media/{p.name}/frames.json",
                         "count": meta.get("count"), "fps": meta.get("fps"),
                         "width": meta.get("width"), "height": meta.get("height")})
     return out

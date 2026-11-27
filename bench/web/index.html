@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Замер моделей позы</title>
+<script src="coi-sw-register.js"></script>
 <style>
   :root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --card:#fff; --line:#e3e3df; --ok:#15803d; --warn:#b45309; --bad:#b91c1c; --acc:#2563eb; }
   @media (prefers-color-scheme: dark) { :root { --bg:#151515; --fg:#ededea; --muted:#a3a39e; --card:#1f1f1e; --line:#33332f; --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --acc:#60a5fa; } }
@@ -43,6 +44,10 @@
 <main>
   <h1>Замер моделей оценки позы в браузере</h1>
   <p class="muted">Страница по очереди запускает модели извлечения ключевых точек и измеряет скорость на этом устройстве. Видео и кадры с вашей камеры на сервер не отправляются — только числа и (в режиме видео) координаты точек тестового ролика.</p>
+
+  <section class="card" id="pagesNote" hidden>
+    <b>Как отправить результаты.</b> Эта страница работает без сервера: результаты сохраняются на телефоне. После замеров нажмите «Поделиться» (или «Скачать») и отправьте файл исследователю — в мессенджере или по почте.
+  </section>
 
   <section class="card">
     <h2>1. Устройство</h2>
@@ -113,6 +118,7 @@
     <div class="btns">
       <button id="download" class="secondary">Скачать все (JSON)</button>
       <button id="share" class="secondary">Поделиться</button>
+      <button id="clear" class="secondary">Очистить</button>
     </div>
     <p class="muted" id="sendState"></p>
   </section>

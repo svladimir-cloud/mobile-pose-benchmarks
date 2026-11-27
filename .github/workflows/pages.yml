@@ -1,0 +1,59 @@
+# Сборка стенда и публикация на GitHub Pages: https://<владелец>.github.io/mobile-pose-benchmarks/
+# Веса моделей в git не хранятся — скачиваются при сборке (models/fetch_models.py), YOLO экспортируется в ONNX.
+name: pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, claude/sleepy-hopper-ycca7l]
+    paths: ["bench/**", "models/**", "tools/**", "package.json", "package-lock.json", ".github/workflows/pages.yml"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci && npm run vendor
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Кэш весов
+        uses: actions/cache@v4
+        with:
+          path: models/cache
+          key: models-${{ hashFiles('models/manifest.json') }}
+      - name: Зависимости для экспорта YOLO
+        run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          pip install ultralytics==8.4.220 onnx onnxslim
+      - name: Веса моделей
+        run: python models/fetch_models.py --skip-reference
+      - name: Сборка сайта
+        run: python tools/build_site.py --out _site --media bench/media
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

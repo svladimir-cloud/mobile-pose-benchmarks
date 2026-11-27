@@ -5,7 +5,7 @@
 // Координаты — пиксели исходного кадра, порядок COCO-17. Предобработка повторяет
 // эталонные конвейеры (MMPose/MMDeploy pipeline.json, Ultralytics LetterBox), чтобы
 // результат совпадал с Python-реализацией (bench/python/models.py).
-import { MP33_TO_COCO17, loadScript, meanScore, now, srcSize } from "./util.js";
+import { MP33_TO_COCO17, abs, loadScript, meanScore, now, srcSize } from "./util.js";
 
 export const BACKENDS = {
   "mediapipe-tasks-vision": ["gpu", "cpu"],
@@ -35,9 +35,9 @@ async function createMediaPipe(model, backend, opts, loader) {
   if (!mpModule) mpModule = await import("../vendor/mediapipe/vision_bundle.mjs");
   const { FilesetResolver, PoseLandmarker } = mpModule;
   const file = model.files.find((f) => f.endsWith(".task"));
-  const buf = await loader.get(`/models/${model.id}/${file}`);
+  const buf = await loader.get(abs(`models/${model.id}/${file}`));
   const t0 = now();
-  if (!mpVision) mpVision = await FilesetResolver.forVisionTasks("/vendor/mediapipe/wasm");
+  if (!mpVision) mpVision = await FilesetResolver.forVisionTasks(abs("vendor/mediapipe/wasm"));
   const image = opts.mode === "image";
   const lm = await PoseLandmarker.createFromOptions(mpVision, {
     baseOptions: { modelAssetBuffer: new Uint8Array(buf), delegate: backend === "gpu" ? "GPU" : "CPU" },
@@ -70,13 +70,13 @@ let tfLoaded = null;
 async function loadTf() {
   if (!tfLoaded) {
     tfLoaded = (async () => {
-      await loadScript("/vendor/tfjs/tf-core.min.js");
-      await loadScript("/vendor/tfjs/tf-converter.min.js");
-      await loadScript("/vendor/tfjs/tf-backend-webgl.min.js");
-      await loadScript("/vendor/tfjs/tf-backend-wasm.min.js");
-      try { await loadScript("/vendor/tfjs/tf-backend-webgpu.min.js"); } catch { /* нет WebGPU-сборки */ }
-      await loadScript("/vendor/tfjs/pose-detection.min.js");
-      window.tf.wasm.setWasmPaths("/vendor/tfjs/wasm/");
+      await loadScript(abs("vendor/tfjs/tf-core.min.js"));
+      await loadScript(abs("vendor/tfjs/tf-converter.min.js"));
+      await loadScript(abs("vendor/tfjs/tf-backend-webgl.min.js"));
+      await loadScript(abs("vendor/tfjs/tf-backend-wasm.min.js"));
+      try { await loadScript(abs("vendor/tfjs/tf-backend-webgpu.min.js")); } catch { /* нет WebGPU-сборки */ }
+      await loadScript(abs("vendor/tfjs/pose-detection.min.js"));
+      window.tf.wasm.setWasmPaths(abs("vendor/tfjs/wasm/"));
     })();
   }
   return tfLoaded;
@@ -85,7 +85,7 @@ async function loadTf() {
 async function createMoveNet(model, backend, opts, loader) {
   await loadTf();
   const tf = window.tf, pd = window.poseDetection;
-  const base = `/models/${model.id}/`;
+  const base = abs(`models/${model.id}/`);
   const mj = JSON.parse(new TextDecoder().decode(await loader.get(base + "model.json")));
   const specs = [], parts = [];
   for (const g of mj.weightsManifest) {
@@ -138,7 +138,7 @@ export async function getOrt() {
   if (!ortModule) {
     ortModule = await import("../vendor/ort/ort.all.min.mjs");
     const env = ortModule.env;
-    env.wasm.wasmPaths = "/vendor/ort/";
+    env.wasm.wasmPaths = abs("vendor/ort/");
     // многопоточность доступна только при crossOriginIsolated (заголовки COOP/COEP сервера)
     env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
     env.wasm.proxy = false;
@@ -245,8 +245,8 @@ async function createRtmPose(model, backend, opts, loader, all) {
   const ort = await getOrt();
   const det = all.find((m) => m.id === (model.detector || "rtmdet-nano"));
   if (!det || !det.ready) throw new Error("нет весов детектора " + model.detector);
-  const detBuf = await loader.get(`/models/${det.id}/${det.files.find((f) => f.endsWith(".onnx"))}`);
-  const poseBuf = await loader.get(`/models/${model.id}/${model.files.find((f) => f.endsWith(".onnx"))}`);
+  const detBuf = await loader.get(abs(`models/${det.id}/${det.files.find((f) => f.endsWith(".onnx"))}`));
+  const poseBuf = await loader.get(abs(`models/${model.id}/${model.files.find((f) => f.endsWith(".onnx"))}`));
   const t0 = now();
   const detector = await makeRtmDet(detBuf, backend);
   const sess = await ortSession(poseBuf, backend);
@@ -309,7 +309,7 @@ async function createRtmPose(model, backend, opts, loader, all) {
 // RTMO-s: одноэтапная, BGR без нормировки, letterbox в угол
 async function createRtmo(model, backend, opts, loader) {
   const ort = await getOrt();
-  const buf = await loader.get(`/models/${model.id}/${model.files.find((f) => f.endsWith(".onnx"))}`);
+  const buf = await loader.get(abs(`models/${model.id}/${model.files.find((f) => f.endsWith(".onnx"))}`));
   const t0 = now();
   const sess = await ortSession(buf, backend);
   const initMs = now() - t0;
@@ -340,7 +340,7 @@ async function createRtmo(model, backend, opts, loader) {
 // YOLOv8/YOLO11-pose (Ultralytics ONNX, без NMS в графе): выход (1, 56, N) = cx,cy,w,h,conf,17*(x,y,c)
 async function createYolo(model, backend, opts, loader) {
   const ort = await getOrt();
-  const buf = await loader.get(`/models/${model.id}/${model.files.find((f) => f.endsWith(".onnx"))}`);
+  const buf = await loader.get(abs(`models/${model.id}/${model.files.find((f) => f.endsWith(".onnx"))}`));
   const t0 = now();
   const sess = await ortSession(buf, backend);
   const initMs = now() - t0;

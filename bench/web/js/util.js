@@ -14,6 +14,8 @@ export const SKELETON = [
 ];
 
 export const now = () => performance.now();
+// Пути относительно страницы: работает и на своём сервере (/), и на GitHub Pages (/<репозиторий>/)
+export const abs = (p) => new URL(p.replace(/^\//, ""), document.baseURI).href;
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export function quantile(sorted, q) {
@@ -62,7 +64,9 @@ export async function fetchTimed(url) {
   const abs = new URL(url, location.href).href;
   const entries = performance.getEntriesByName(abs);
   const e = entries[entries.length - 1];
-  const fromCache = e ? e.transferSize === 0 && e.decodedBodySize > 0 : null;
+  // через service worker (GitHub Pages) Resource Timing не различает кэш и сеть -> null
+  const viaSw = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+  const fromCache = e && !viaSw ? e.transferSize === 0 && e.decodedBodySize > 0 : null;
   return { buffer, ms, bytes: buffer.byteLength, fromCache, url };
 }
 

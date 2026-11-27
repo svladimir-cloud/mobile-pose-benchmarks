@@ -2,7 +2,7 @@
 import { detectCapabilities, detectDevice, readBattery } from "./caps.js";
 import { BACKENDS, preferredBackends } from "./models.js";
 import { DEFAULT_PARAMS, VideoSource, runFrames, runImages, runRealtime } from "./runner.js";
-import { newId, round, shuffle, sleep } from "./util.js";
+import { abs, newId, round, shuffle, sleep } from "./util.js";
 
 const $ = (id) => document.getElementById(id);
 const FPS_TARGET = 10;   // ориентир цели статьи; окончательный порог — eval/fmin.py
@@ -10,11 +10,22 @@ const QS = new URLSearchParams(location.search);
 
 const state = { cfg: null, caps: null, device: null, versions: {}, results: [], running: false, stop: false, wakeLock: null };
 
+// Конфигурация: сервер стенда (/api/config) или статическая сборка (config.json, GitHub Pages)
+async function loadConfig() {
+  try {
+    const r = await fetch(abs("api/config"));
+    if (r.ok && (r.headers.get("content-type") || "").includes("json")) return { ...(await r.json()), server: true };
+  } catch { /* статический хостинг */ }
+  const r = await fetch(abs("config.json"));
+  if (!r.ok) throw new Error("нет ни /api/config, ни config.json");
+  return { ...(await r.json()), server: false };
+}
+
 async function init() {
   const [cfg, caps, device, versions] = await Promise.all([
-    fetch("/api/config").then((r) => r.json()),
+    loadConfig(),
     detectCapabilities(), detectDevice(),
-    fetch("/vendor/versions.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
+    fetch(abs("vendor/versions.json")).then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
   ]);
   Object.assign(state, { cfg, caps, device, versions });
   $("devLabel").value = localStorage.getItem("mpb.label") || device.ua_model || "";
@@ -28,6 +39,15 @@ async function init() {
   $("download").onclick = download;
   $("share").onclick = share;
   updateMode();
+  if (!cfg.server) {
+    $("pagesNote").hidden = false;
+    try {
+      const prev = JSON.parse(localStorage.getItem("mpb.results") || "[]");
+      for (const d of prev) addResult(d);
+      if (prev.length) $("sendState").textContent = `Сохранённые ранее результаты: ${prev.length}. Нажмите «Поделиться» или «Скачать», затем «Очистить».`;
+    } catch { /* нет */ }
+  }
+  $("clear").onclick = () => { try { localStorage.removeItem("mpb.results"); } catch { /* нет */ } state.results = []; $("results").querySelector("tbody").innerHTML = ""; $("sendState").textContent = "Очищено."; };
   if (QS.get("auto") === "1") autostart();
 }
 
@@ -229,12 +249,22 @@ const fmt = (v, d) => (v == null || !Number.isFinite(v) ? "—" : v.toFixed(d));
 const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 let sent = 0, unsent = 0;
+// копия результатов в браузере — чтобы не потерять при перезагрузке страницы
+function keepLocal(doc) {
+  try {
+    const all = JSON.parse(localStorage.getItem("mpb.results") || "[]");
+    all.push(doc);
+    localStorage.setItem("mpb.results", JSON.stringify(all.slice(-60)));
+  } catch { /* переполнено или недоступно — остаётся кнопка «Скачать» */ }
+}
 async function send(doc) {
   try {
-    const r = await fetch("/api/result", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(doc) });
+    const url = state.cfg.server ? abs("api/result") : state.cfg.results_endpoint;
+    if (!url) { keepLocal(doc); $("sendState").textContent = `Сохранено на этом устройстве: ${state.results.length}. Когда закончите — нажмите «Поделиться» или «Скачать» и отправьте файл.`; return; }
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": state.cfg.server ? "application/json" : "text/plain" }, body: JSON.stringify(doc) });
     if (!r.ok) throw new Error("HTTP " + r.status);
     sent++;
-  } catch { unsent++; }
+  } catch { unsent++; keepLocal(doc); }
   $("sendState").textContent = `Отправлено на сервер: ${sent}` + (unsent ? ` · не отправлено: ${unsent} — скачайте файл` : "");
 }
 

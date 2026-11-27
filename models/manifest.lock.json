@@ -1,0 +1,212 @@
+{
+  "models": {
+    "mediapipe-lite": {
+      "fetched_at": "2026-11-27T04:21:31+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/mediapipe-lite/pose_landmarker_lite.task",
+          "bytes": 5777746,
+          "sha256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a"
+        }
+      ],
+      "serve_bytes": 5777746
+    },
+    "mediapipe-full": {
+      "fetched_at": "2026-11-27T04:21:31+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/mediapipe-full/pose_landmarker_full.task",
+          "bytes": 9398198,
+          "sha256": "5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1"
+        }
+      ],
+      "serve_bytes": 9398198
+    },
+    "mediapipe-heavy": {
+      "fetched_at": "2026-11-27T04:21:31+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/mediapipe-heavy/pose_landmarker_heavy.task",
+          "bytes": 30664242,
+          "sha256": "64437af838a65d18e5ba7a0d39b465540069bc8aae8308de3e318aad31fcbc7b"
+        }
+      ],
+      "serve_bytes": 30664242
+    },
+    "movenet-lightning": {
+      "fetched_at": "2026-11-27T04:21:33+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/movenet-lightning/model.json",
+          "bytes": 168013,
+          "sha256": "c65a3447162efa0c42af29498a4b151f4415b36ff3ae6fae2b28a32e840dcbfb"
+        },
+        {
+          "path": "models/cache/movenet-lightning/group1-shard1of2.bin",
+          "bytes": 4194304,
+          "sha256": "b42c3232bf13b0efc691d3f0693dd3fc74404f709b1deee0a271828af6dbbea2"
+        },
+        {
+          "path": "models/cache/movenet-lightning/group1-shard2of2.bin",
+          "bytes": 455912,
+          "sha256": "8253ab965aa3122c08f331777ca395ce9ca19bb9e7cb278b99de1c46dbdeb6dc"
+        }
+      ],
+      "serve_bytes": 4818229
+    },
+    "movenet-thunder": {
+      "fetched_at": "2026-11-27T04:21:35+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/movenet-thunder/model.json",
+          "bytes": 168151,
+          "sha256": "957721af760b24a1abc93ce5d42caf0cb7795723ab873d3791f5f42f5cb8c7ca"
+        },
+        {
+          "path": "models/cache/movenet-thunder/group1-shard1of3.bin",
+          "bytes": 4194304,
+          "sha256": "58dd47fd600a4849c342ce14e2ec32102744ca3d5f7fd9e6888d284f7f922cba"
+        },
+        {
+          "path": "models/cache/movenet-thunder/group1-shard2of3.bin",
+          "bytes": 4194304,
+          "sha256": "08da980bc00886854f29b49b9c14528cd41626c0498c67b450de394713f1d0bc"
+        },
+        {
+          "path": "models/cache/movenet-thunder/group1-shard3of3.bin",
+          "bytes": 4088504,
+          "sha256": "c1c6b712e33456aa95aa556b6425528d04fe8730ce9b92de38ec58e947fede34"
+        }
+      ],
+      "serve_bytes": 12645263
+    },
+    "rtmdet-nano": {
+      "fetched_at": "2026-11-27T04:21:38+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/rtmdet-nano/rtmdet-nano.onnx",
+          "bytes": 4010667,
+          "sha256": "8297e829ccc5590c8e2d32d5a211f322a0585fb7467eec85eb12c9525b0b95d6"
+        }
+      ],
+      "serve_bytes": 4010667
+    },
+    "rtmpose-t": {
+      "fetched_at": "2026-11-27T04:21:41+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/rtmpose-t/rtmpose-t.onnx",
+          "bytes": 13350364,
+          "sha256": "a6c2f6a3896a4d51131d14d7a80a3d08b50f559af5a58a45d5b098aef510a70f"
+        }
+      ],
+      "serve_bytes": 13350364
+    },
+    "rtmpose-s": {
+      "fetched_at": "2026-11-27T04:21:45+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/rtmpose-s/rtmpose-s.onnx",
+          "bytes": 21890172,
+          "sha256": "9aeb635b83f86aea45cf45d85798f7eba1a162de8e0d721c44e54fe5eebaf47d"
+        }
+      ],
+      "serve_bytes": 21890172
+    },
+    "rtmo-s": {
+      "fetched_at": "2026-11-27T04:21:52+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/rtmo-s/rtmo-s.onnx",
+          "bytes": 39617685,
+          "sha256": "d0703d40d19f3921da51ae725402d5fdae4d2478c7442072d3101bd396f370d8"
+        }
+      ],
+      "serve_bytes": 39617685
+    },
+    "ref-yolox-m": {
+      "fetched_at": "2026-11-27T04:22:07+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/ref-yolox-m/yolox-m.onnx",
+          "bytes": 101400344,
+          "sha256": "3dea6513388889f0fff4b77bf7a26013600321b9eb9ceb0e9a400a82572f5f23"
+        }
+      ],
+      "serve_bytes": 101400344
+    },
+    "ref-rtmpose-x": {
+      "fetched_at": "2026-11-27T04:23:09+00:00",
+      "license": "Apache-2.0",
+      "tools": {},
+      "files": [
+        {
+          "path": "models/cache/ref-rtmpose-x/rtmpose-x.onnx",
+          "bytes": 197660326,
+          "sha256": "df0c0fa91e9870b1515dcaff741fd76cc753dcfb12786862f61b243bae81cd52"
+        }
+      ],
+      "serve_bytes": 197660326
+    },
+    "yolov8n-pose": {
+      "fetched_at": "2026-11-27T04:30:27+00:00",
+      "license": "AGPL-3.0",
+      "tools": {
+        "ultralytics": "8.4.220"
+      },
+      "files": [
+        {
+          "path": "models/cache/yolov8n-pose/yolov8n-pose.pt",
+          "bytes": 6832633,
+          "sha256": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212"
+        },
+        {
+          "path": "models/cache/yolov8n-pose/yolov8n-pose.onnx",
+          "bytes": 13514626,
+          "sha256": "334587ce9485cba07538e0b598eb9b8d0d18e8fd9c8110eb5aeb1b9c6f19ce17"
+        }
+      ],
+      "serve_bytes": 13514626
+    },
+    "yolo11n-pose": {
+      "fetched_at": "2026-11-27T04:30:28+00:00",
+      "license": "AGPL-3.0",
+      "tools": {
+        "ultralytics": "8.4.220"
+      },
+      "files": [
+        {
+          "path": "models/cache/yolo11n-pose/yolo11n-pose.pt",
+          "bytes": 6255593,
+          "sha256": "869e83fcdffdc7371fa4e34cd8e51c838cc729571d1635e5141e3075e9319dc0"
+        },
+        {
+          "path": "models/cache/yolo11n-pose/yolo11n-pose.onnx",
+          "bytes": 11853516,
+          "sha256": "9c8ce90f1ed79b13affcc398e9f4326c59441a7fa63465404f0bfbd3da15142b"
+        }
+      ],
+      "serve_bytes": 11853516
+    }
+  }
+}

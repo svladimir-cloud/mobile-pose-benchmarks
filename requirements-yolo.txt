@@ -1,0 +1,6 @@
+# Только для экспорта YOLOv8n/YOLO11n-pose в ONNX и Python-сверки YOLO (Ultralytics, лицензия AGPL-3.0)
+ultralytics==8.4.220
+torch==2.15.0
+torchvision
+onnx
+onnxslim

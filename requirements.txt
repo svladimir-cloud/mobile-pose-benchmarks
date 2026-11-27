@@ -1,0 +1,9 @@
+# Сервер стенда, загрузка моделей, Python-реализации моделей (сверка R1.5, эталон), eval/
+# Версии согласованы с браузерными рантаймами (package.json): onnxruntime-web 1.30.0, @mediapipe/tasks-vision 1.1.1
+cryptography==50.0.1
+numpy==2.5.3
+opencv-python-headless==5.1.0.95
+onnxruntime==1.30.0
+mediapipe==1.1.1
+pycocotools==2.0.11
+pytest==9.1.1

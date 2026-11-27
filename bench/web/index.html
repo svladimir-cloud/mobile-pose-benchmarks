@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Замер моделей позы</title>
+<style>
+  :root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --card:#fff; --line:#e3e3df; --ok:#15803d; --warn:#b45309; --bad:#b91c1c; --acc:#2563eb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#151515; --fg:#ededea; --muted:#a3a39e; --card:#1f1f1e; --line:#33332f; --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --acc:#60a5fa; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--fg); }
+  main { max-width: 900px; margin: 0 auto; padding: 12px 16px 48px; }
+  h1 { font-size: 20px; margin: 4px 0 8px; }
+  h2 { font-size: 16px; margin: 0 0 8px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; margin:10px 0; }
+  .muted { color: var(--muted); font-size: 13px; }
+  label { display:block; margin: 6px 0 2px; font-size: 13px; color: var(--muted); }
+  input, select { width:100%; padding:9px 10px; font-size:15px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--fg); }
+  .row { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+  button { padding: 11px 14px; font-size: 15px; border-radius: 10px; border: 0; background: var(--acc); color: #fff; font-weight: 600; cursor: pointer; }
+  button.secondary { background: transparent; color: var(--acc); border: 1px solid var(--acc); }
+  button:disabled { opacity: .5; }
+  .btns { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .stage { position: relative; background:#000; border-radius: 10px; overflow:hidden; max-height: 48vh; display:flex; justify-content:center; }
+  .stage video, .stage canvas.src { max-width:100%; max-height:48vh; display:block; }
+  .stage canvas.ov { position:absolute; inset:0; margin:auto; max-width:100%; max-height:48vh; pointer-events:none; }
+  .status { font-variant-numeric: tabular-nums; margin-top: 8px; }
+  table { width:100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 6px 4px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  td.num { text-align: right; }
+  .tag { display:inline-block; padding: 1px 6px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+  .caps span { display:inline-block; margin: 2px 8px 2px 0; }
+  details summary { cursor: pointer; color: var(--acc); }
+  .scroll { overflow-x: auto; }
+  .models { display:grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 4px 12px; }
+  .models label { display:flex; gap:6px; align-items:center; color: var(--fg); font-size:14px; margin: 2px 0; }
+  .models input { width:auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Замер моделей оценки позы в браузере</h1>
+  <p class="muted">Страница по очереди запускает модели извлечения ключевых точек и измеряет скорость на этом устройстве. Видео и кадры с вашей камеры на сервер не отправляются — только числа и (в режиме видео) координаты точек тестового ролика.</p>
+
+  <section class="card">
+    <h2>1. Устройство</h2>
+    <div class="row">
+      <div><label for="devLabel">Модель телефона</label><input id="devLabel" placeholder="например, Samsung Galaxy A54"></div>
+      <div><label for="devYear">Год выпуска (если знаете)</label><input id="devYear" inputmode="numeric" placeholder="2023"></div>
+    </div>
+    <div class="row">
+      <div><label for="devTemp">Температура корпуса/батареи, °C (если знаете)</label><input id="devTemp" inputmode="decimal" placeholder=""></div>
+      <div><label for="devNote">Примечание</label><input id="devNote" placeholder="чехол, режим энергосбережения выкл. и т. п."></div>
+    </div>
+    <div class="caps muted" id="caps">Определяю возможности браузера…</div>
+  </section>
+
+  <section class="card">
+    <h2>2. Что запустить</h2>
+    <label for="mode">Режим</label>
+    <select id="mode">
+      <option value="quick">Быстрый тест: все модели на лучшем бэкенде (~10 мин)</option>
+      <option value="full">Полная матрица: все модели × все бэкенды (~25 мин)</option>
+      <option value="long">Длительный прогон 10 мин: одна модель</option>
+      <option value="frames">Точность на кадрах ролика (все кадры подряд)</option>
+      <option value="images">COCO: изображения (для ПК)</option>
+      <option value="custom">Выбрать вручную</option>
+    </select>
+    <div class="row">
+      <div><label for="source">Источник кадров</label><select id="source"></select></div>
+      <div id="backendBox"><label for="backend">Бэкенд (для «вручную» и «длительного»)</label><select id="backend"><option value="auto">лучший доступный</option></select></div>
+    </div>
+    <div id="modelsBox"><label>Модели</label><div class="models" id="models"></div></div>
+    <details><summary>Параметры замера</summary>
+      <div class="row">
+        <div><label>Прогрев: кадров / максимум, с</label><input id="pWarm" value="50 / 15"></div>
+        <div><label>Замер: кадров / максимум, с</label><input id="pMeas" value="200 / 40"></div>
+      </div>
+      <div class="row">
+        <div><label>Детектор у двухэтапных моделей — раз в N кадров</label><input id="pDet" value="10" inputmode="numeric"></div>
+        <div><label>Повторов матрицы</label><input id="pRep" value="1" inputmode="numeric"></div>
+      </div>
+      <div class="row">
+        <div><label>Длительный прогон, мин</label><input id="pLong" value="10" inputmode="numeric"></div>
+        <div><label>COCO: число изображений (0 — все)</label><input id="pCoco" value="0" inputmode="numeric"></div>
+      </div>
+      <div class="row">
+        <div><label>Порядок моделей: seed</label><input id="pSeed" inputmode="numeric"></div>
+        <div><label>Пауза между моделями, с</label><input id="pPause" value="3" inputmode="numeric"></div>
+      </div>
+    </details>
+    <p class="muted" id="hint"></p>
+    <div class="btns">
+      <button id="start">Старт</button>
+      <button id="stop" class="secondary" disabled>Остановить</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="stage"><video id="video" muted playsinline></video><canvas class="ov" id="overlay"></canvas></div>
+    <div class="status" id="status">—</div>
+    <div class="muted" id="phase"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. Результаты</h2>
+    <p class="muted">Каждый результат сразу отправляется на сервер стенда. Если отправка не удалась, нажмите «Скачать» и перешлите файл.</p>
+    <div class="scroll"><table id="results"><thead><tr>
+      <th>Модель</th><th>Бэкенд</th><th class="num">кадр/с</th><th class="num">p50, мс</th><th class="num">p95, мс</th><th class="num">пропуск, %</th><th class="num">старт, с</th><th>Итог</th>
+    </tr></thead><tbody></tbody></table></div>
+    <div class="btns">
+      <button id="download" class="secondary">Скачать все (JSON)</button>
+      <button id="share" class="secondary">Поделиться</button>
+    </div>
+    <p class="muted" id="sendState"></p>
+  </section>
+</main>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

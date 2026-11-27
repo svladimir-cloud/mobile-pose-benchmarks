@@ -9,3 +9,9 @@ models/cache/
 results/raw/*.large.json
 __pycache__/
 .venv/
+bench/web/vendor/
+bench/.cert/
+datasets/media/*
+!datasets/media/.gitkeep
+*.pt
+.pytest_cache/

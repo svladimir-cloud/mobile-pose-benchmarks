@@ -19,11 +19,23 @@
 | `AGENTS.md` | правила для агентов (зоны ответственности, запись по ходу, без выдуманных чисел) |
 | `data/README.md` | схемы итоговых CSV, которые переносятся в статью |
 | `HANDOFF.md` | как продолжить работу в новом чате |
+| **`docs/phone_protocol.md`** | **как запустить стенд и замерить телефоны** |
+| `docs/result_format.md` | формат сырых результатов |
+| `bench/README.md`, `eval/README.md` | стенд и скрипты анализа |
+
+## Быстрый старт
+
+```bash
+pip install -r requirements.txt && npm ci && npm run vendor
+python models/fetch_models.py --skip-yolo      # с YOLO: pip install -r requirements-yolo.txt, затем без --skip-yolo
+python bench/server.py                          # адрес и QR-код для телефона — в консоли
+```
 
 ## Структура
 
 ```
-bench/      веб-стенд: страница замеров, адаптеры моделей, раннер (Playwright)
+bench/      веб-стенд: сервер, страница замеров, адаптеры моделей; bench/python — те же модели на Python
+tools/      vendor.mjs (рантаймы из npm), extract_frames.py (видео -> кадры), smoke.mjs (проверка в headless Chromium)
 eval/       Python: метрики точности, полноты, стабильности; агрегация в data/*.csv
 models/     manifest.json — источники и хеши весов (сами веса в git не кладутся)
 datasets/   локальные данные (COCO, собственные видео) — в git не кладутся

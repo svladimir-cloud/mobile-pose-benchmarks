@@ -22,3 +22,13 @@
 | 2026-11-27T04:46:15 | 20261127-044615-1iq8 | rtmpose-s | wasm | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044615_cloud-headless_rtmpose-s_wasm_images.json | ok |
 | 2026-11-27T04:46:55 | 20261127-044655-ex0f | rtmo-s | wasm | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044655_cloud-headless_rtmo-s_wasm_images.json | ok |
 | 2026-11-27T04:49:56 | 20261127-044956-movz | movenet-lightning | wasm | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044956_cloud-headless_movenet-lightning_wasm_images.json | ok |
+| 2026-11-27T04:51:39 | 20261127-045139-sziw | mediapipe-full | cpu | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-045139_cloud-headless_mediapipe-full_cpu_images.json | ok |
+| 2026-11-27T04:52:32 | 20261127-045232-axdn | rtmpose-s | wasm | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-045232_cloud-headless_rtmpose-s_wasm_images.json | ok |
+| 2026-11-27T04:53:22 | 20261127-045322-xdba | mediapipe-lite | cpu | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-045322_cloud-headless_mediapipe-lite_cpu_images.json | ok |
+| 2026-11-27T04:54:05 | 20261127-045405-hbtc | movenet-lightning | wasm | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-045405_cloud-headless_movenet-lightning_wasm_images.json | ok |
+| 2026-11-27T04:54:34 | 20261127-045434-4otw | rtmo-s | wasm | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-045434_cloud-headless_rtmo-s_wasm_images.json | ok |
+| 2026-11-27T04:58:35 | 20261127-045835-omlk | mediapipe-heavy | cpu | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-045835_cloud-headless_mediapipe-heavy_cpu_images.json | ok |
+| 2026-11-27T05:00:37 | 20261127-050037-ckg8 | movenet-thunder | wasm | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-050037_cloud-headless_movenet-thunder_wasm_images.json | ok |
+| 2026-11-27T05:01:35 | 20261127-050135-ahmq | rtmpose-t | wasm | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-050135_cloud-headless_rtmpose-t_wasm_images.json | ok |
+| 2026-11-27T05:02:14 | 20261127-050214-sjgc | yolov8n-pose | wasm | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-050214_cloud-headless_yolov8n-pose_wasm_images.json | ok |
+| 2026-11-27T05:04:09 | 20261127-050409-alym | yolo11n-pose | wasm | desktop-headless / cloud-headless | images coco-single | 921 | results/raw/20261127-050409_cloud-headless_yolo11n-pose_wasm_images.json | ok |

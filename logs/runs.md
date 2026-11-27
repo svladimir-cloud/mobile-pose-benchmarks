@@ -12,3 +12,5 @@
 | 2026-11-27T04:39:05 | 20261127-043905-jodv | movenet-thunder | wasm | desktop-headless / cloud-headless | speed openpose-demo | 60 | results/raw/20261127-043905_cloud-headless_movenet-thunder_wasm_speed.json | ok |
 | 2026-11-27T04:39:19 | 20261127-043919-v7v1 | mediapipe-lite | cpu | desktop-headless / cloud-headless | speed openpose-demo | 60 | results/raw/20261127-043919_cloud-headless_mediapipe-lite_cpu_speed.json | ok |
 | 2026-11-27T04:39:25 | 20261127-043925-khl2 | rtmo-s | wasm | desktop-headless / cloud-headless | speed openpose-demo | 12 | results/raw/20261127-043925_cloud-headless_rtmo-s_wasm_speed.json | ok |
+| 2026-11-27T04:40:08 | 20261127-044008-poss | mediapipe-heavy | cpu | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044008_cloud-headless_mediapipe-heavy_cpu_images.json | ok |
+| 2026-11-27T04:40:59 | 20261127-044059-7rj3 | mediapipe-lite | cpu | desktop-headless / cloud-headless | images coco-single | 300 | results/raw/20261127-044059_cloud-headless_mediapipe-lite_cpu_images.json | ok |

@@ -4,6 +4,8 @@ self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.cache === "only-if-cached" && req.mode !== "same-origin") return;
+  // страница стенда v1 (bench/phone/) грузит модель с другого домена — изоляция ей помешает
+  if (new URL(req.url).pathname.includes("/bench/phone/")) return;
   e.respondWith(fetch(req).then((res) => {
     if (res.status === 0) return res;   // opaque-ответ не трогаем
     const h = new Headers(res.headers);

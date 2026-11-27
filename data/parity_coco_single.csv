@@ -1,7 +1,7 @@
 model,browser_backend,browser_runtime,browser_runtime_version,n_images,n_both_found,found_by_one_only_pct,mean_diff_px,p95_diff_px,within_2px_pct,mean_diff_norm,browser_file,python_file
-mediapipe-full,cpu,mediapipe-tasks-vision,1.1.1,921,642,1.09,1.543,5.581,90.47,0.00423,20261127-045139_cloud-headless_mediapipe-full_cpu_images.json,20261127-045100_python_mediapipe-full_cpu_images.json
-mediapipe-heavy,cpu,mediapipe-tasks-vision,1.1.1,921,655,0.87,1.495,4.355,91.7,0.00428,20261127-045835_cloud-headless_mediapipe-heavy_cpu_images.json,20261127-045124_python_mediapipe-heavy_cpu_images.json
-mediapipe-lite,cpu,mediapipe-tasks-vision,1.1.1,921,656,1.41,1.701,5.951,90.02,0.00461,20261127-045322_cloud-headless_mediapipe-lite_cpu_images.json,20261127-045038_python_mediapipe-lite_cpu_images.json
+blazepose-full,cpu,mediapipe-tasks-vision,1.1.1,921,642,1.09,1.543,5.581,90.47,0.00423,20261127-045139_cloud-headless_blazepose-full_cpu_images.json,20261127-045100_python_blazepose-full_cpu_images.json
+blazepose-heavy,cpu,mediapipe-tasks-vision,1.1.1,921,655,0.87,1.495,4.355,91.7,0.00428,20261127-045835_cloud-headless_blazepose-heavy_cpu_images.json,20261127-045124_python_blazepose-heavy_cpu_images.json
+blazepose-lite,cpu,mediapipe-tasks-vision,1.1.1,921,656,1.41,1.701,5.951,90.02,0.00461,20261127-045322_cloud-headless_blazepose-lite_cpu_images.json,20261127-045038_python_blazepose-lite_cpu_images.json
 rtmo-s,wasm,onnxruntime-web,1.30.0,921,901,0.11,0.476,1.432,96.13,0.00204,20261127-045434_cloud-headless_rtmo-s_wasm_images.json,20261127-043714_python_rtmo-s_cpu_images.json
 rtmpose-s,wasm,onnxruntime-web,1.30.0,921,909,0.43,8.654,34.99,63.75,0.02391,20261127-045232_cloud-headless_rtmpose-s_wasm_images.json,20261127-043601_python_rtmpose-s_cpu_images.json
 rtmpose-t,wasm,onnxruntime-web,1.30.0,921,909,0.43,9.324,35.212,61.68,0.02608,20261127-050135_cloud-headless_rtmpose-t_wasm_images.json,20261127-043502_python_rtmpose-t_cpu_images.json

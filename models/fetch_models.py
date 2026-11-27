@@ -1,11 +1,11 @@
-"""Скачивание и проверка весов по models/manifest.json.
+"""Скачивание и проверка весов по models/sources.json (стенд v2).
 
   python models/fetch_models.py                 # все модели
-  python models/fetch_models.py --only rtmpose-t mediapipe-lite
+  python models/fetch_models.py --only rtmpose-t blazepose-lite
   python models/fetch_models.py --skip-yolo     # без экспорта YOLO (нужен ultralytics + torch)
 
 Веса -> models/cache/<id>/<файл>. Итог (SHA-256, размер, дата, версия инструментов) ->
-models/manifest.lock.json. Скачанные файлы не исполняются; zip распаковывается только
+models/sources.lock.json. Скачанные файлы не исполняются; zip распаковывается только
 по имени нужного члена архива.
 """
 from __future__ import annotations
@@ -25,8 +25,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 CACHE = ROOT / "cache"
-MANIFEST = ROOT / "manifest.json"
-LOCK = ROOT / "manifest.lock.json"
+MANIFEST = ROOT / "sources.json"
+LOCK = ROOT / "sources.lock.json"
 # TF Hub (-> Kaggle) отдаёт 404 клиентам без браузерного User-Agent
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"
 

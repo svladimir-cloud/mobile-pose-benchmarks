@@ -100,9 +100,11 @@ rsync -av user@server:/opt/mpb/results/raw/ results/raw/
 - **Видео для режима «видео»** берутся из `bench/media/` (коммитятся в репозиторий; только свои записи с согласием, mp4 H.264, до ~20 МБ). Без них доступна только камера.
 - `from_cache` в холодном старте не определяется (через service worker Resource Timing не отличает кэш от сети).
 
-Включение (один раз, владелец репозитория):
-1. Settings → Pages → Build and deployment → Source: **GitHub Actions**.
-2. Settings → Environments → `github-pages` → Deployment branches: добавить `claude/sleepy-hopper-ycca7l` (или влить ветку в `main`).
+Включение (один раз, владелец репозитория). Сейчас Pages публикует ветку `claude/wizardly-thompson-g1vm38` как есть («Deploy from a branch»); стенду v2 нужна сборка через Actions:
+1. Settings → Pages → Build and deployment → Source: **GitHub Actions** (вместо «Deploy from a branch»).
+2. Settings → Environments → `github-pages` → Deployment branches and tags: добавить `claude/sleepy-hopper-ycca7l` — либо влить эту ветку в `main` (по умолчанию публиковать можно только из `main`).
 3. Actions → `pages` → Run workflow (или любой push в `bench/`). Сборка ≈ 5–10 мин.
+
+Старая страница стенда v1 остаётся по прежнему адресу: `…/mobile-pose-benchmarks/bench/phone/dist/phone.html` (сборка копирует её; service worker её не трогает).
 
 Ссылка с автозапуском для участников: `https://svladimir-cloud.github.io/mobile-pose-benchmarks/?auto=1&mode=quick&source=video:media/squat01.mp4`.

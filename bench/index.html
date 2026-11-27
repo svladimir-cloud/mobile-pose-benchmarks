@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Стенд оценки позы</title>
+</head>
+<body>
+<p id="status">Стенд готов. Управление — из раннера (window.bench).</p>
+<script type="module">
+import { loadAdapter, REGISTRY } from './adapters/registry.js';
+import { probeEnv } from './env.js';
+
+let adapter = null;
+async function loadImage(url) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  return img;
+}
+window.bench = {
+  probeEnv,
+  models: () => Object.fromEntries(Object.entries(REGISTRY).map(([k, v]) => [k, v.backends])),
+  async init({ model, backend, ...extra }) {
+    adapter = await loadAdapter(model, backend, extra);
+    return { model: adapter.model, variant: adapter.variant, delegate: adapter.delegate ?? null,
+      runtime: adapter.runtime, runtimeVersion: adapter.runtimeVersion, inputSize: adapter.inputSize,
+      modelBytes: adapter.modelBytes, modelFiles: adapter.modelFiles ?? [], scoreSource: adapter.scoreSource,
+      backendInfo: adapter.backendInfo ?? null, cold: adapter.coldTimings };
+  },
+  // Точность: по одному прогону на изображение; загрузка/декодирование — вне замера.
+  async runImages(urls, ids) {
+    const out = [];
+    for (let k = 0; k < urls.length; k++) {
+      const img = await loadImage(urls[k]);
+      const r = await adapter.predict(img);
+      out.push({ image_id: ids[k], ...r });
+    }
+    return out;
+  },
+  // Первый инференс (холодный старт, этап 3) — отдельно.
+  async firstInfer(url) {
+    const img = await loadImage(url);
+    return (await adapter.predict(img)).timings.infer_ms;
+  },
+  // Скорость: nWarmup + nMeasure вызовов по кругу на предзагруженных изображениях.
+  async runLatency(urls, nWarmup, nMeasure) {
+    const imgs = [];
+    for (const u of urls) imgs.push(await loadImage(u));
+    for (let i = 0; i < nWarmup; i++) await adapter.predict(imgs[i % imgs.length]);
+    const lat = [];
+    for (let i = 0; i < nMeasure; i++) lat.push((await adapter.predict(imgs[i % imgs.length])).timings.infer_ms);
+    return lat;
+  },
+};
+document.getElementById('status').dataset.ready = '1';
+</script>
+</body>
+</html>

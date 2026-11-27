@@ -28,7 +28,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 CACHE = ROOT / "models" / "cache"
-MANIFEST = json.loads((ROOT / "models" / "manifest.json").read_text(encoding="utf-8"))
+MANIFEST = json.loads((ROOT / "models" / "sources.json").read_text(encoding="utf-8"))
 MODELS = {m["id"]: m for m in MANIFEST["models"]}
 MP33_TO_COCO17 = [0, 2, 5, 7, 8, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
 DET_THR = 0.3

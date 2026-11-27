@@ -28,7 +28,7 @@ from urllib.parse import unquote, urlparse
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "bench" / "web"
 MODELS = ROOT / "models" / "cache"
-MANIFEST = ROOT / "models" / "manifest.json"
+MANIFEST = ROOT / "models" / "sources.json"
 MEDIA = ROOT / "datasets" / "media"
 COCO_IMG = ROOT / "datasets" / "coco" / "val2017"
 COCO_LIST = ROOT / "datasets" / "coco" / "single_person_list.json"

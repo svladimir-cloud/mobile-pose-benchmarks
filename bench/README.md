@@ -18,7 +18,7 @@ bench/
 
 | Модель | Рантайм | Бэкенды | Вход | Заметки |
 |---|---|---|---|---|
-| mediapipe-lite / full / heavy | MediaPipe Tasks Vision 1.1.1 | gpu (WebGL), cpu (WASM SIMD) | 256×256 | режим VIDEO (трекинг), 33 → 17 точек по Табл. 4, score = visibility |
+| blazepose-lite / full / heavy | MediaPipe Tasks Vision 1.1.1 | gpu (WebGL), cpu (WASM SIMD) | 256×256 | режим VIDEO (трекинг), 33 → 17 точек по Табл. 4, score = visibility |
 | movenet-lightning / thunder | TF.js 4.22 + pose-detection 2.1.3 | webgl, wasm (SIMD + потоки), webgpu | 192 / 256 | официальная модель TF Hub, сглаживание выключено |
 | rtmpose-t / s | ONNX Runtime Web 1.30 | webgpu, wasm (SIMD + потоки), webgl | 256×192 | детектор RTMDet-nano раз в N кадров (по умолчанию 10), между ними — бокс по точкам прошлого кадра (как rtmlib PoseTracker); веса body7 |
 | rtmo-s | ONNX Runtime Web | webgpu, wasm, webgl | 640×640 | одноэтапная |

@@ -1,0 +1,105 @@
+{
+  "schema": "mpb-sources/1",
+  "note": "Источники весов. Фактические SHA-256, размеры и дата загрузки пишутся в models/sources.lock.json скриптом models/fetch_models.py. Веса лежат в models/cache/ (не коммитятся).",
+  "models": [
+    {
+      "id": "blazepose-lite", "family": "blazepose", "variant": "lite", "role": "browser",
+      "runtime": "mediapipe-tasks-vision", "input_size": "256x256", "keypoints": 33,
+      "license": "Apache-2.0",
+      "files": [{ "name": "pose_landmarker_lite.task", "url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task" }],
+      "conversion": "нет (опубликованный .task, float16)"
+    },
+    {
+      "id": "blazepose-full", "family": "blazepose", "variant": "full", "role": "browser",
+      "runtime": "mediapipe-tasks-vision", "input_size": "256x256", "keypoints": 33,
+      "license": "Apache-2.0",
+      "files": [{ "name": "pose_landmarker_full.task", "url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task" }],
+      "conversion": "нет (опубликованный .task, float16)"
+    },
+    {
+      "id": "blazepose-heavy", "family": "blazepose", "variant": "heavy", "role": "browser",
+      "runtime": "mediapipe-tasks-vision", "input_size": "256x256", "keypoints": 33,
+      "license": "Apache-2.0",
+      "files": [{ "name": "pose_landmarker_heavy.task", "url": "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task" }],
+      "conversion": "нет (опубликованный .task, float16)"
+    },
+    {
+      "id": "movenet-lightning", "family": "movenet", "variant": "lightning", "role": "browser",
+      "runtime": "tfjs", "input_size": "192x192", "keypoints": 17,
+      "license": "Apache-2.0",
+      "tfjs_graph": "https://tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4",
+      "files": [{ "name": "model.json", "url": "https://tfhub.dev/google/tfjs-model/movenet/singlepose/lightning/4/model.json?tfjs-format=file" }],
+      "conversion": "нет (официальная TF.js-модель, TF Hub → Kaggle Models)"
+    },
+    {
+      "id": "movenet-thunder", "family": "movenet", "variant": "thunder", "role": "browser",
+      "runtime": "tfjs", "input_size": "256x256", "keypoints": 17,
+      "license": "Apache-2.0",
+      "tfjs_graph": "https://tfhub.dev/google/tfjs-model/movenet/singlepose/thunder/4",
+      "files": [{ "name": "model.json", "url": "https://tfhub.dev/google/tfjs-model/movenet/singlepose/thunder/4/model.json?tfjs-format=file" }],
+      "conversion": "нет (официальная TF.js-модель, TF Hub → Kaggle Models)"
+    },
+    {
+      "id": "rtmdet-nano", "family": "rtmdet", "variant": "nano-person", "role": "detector",
+      "runtime": "onnxruntime-web", "input_size": "320x320", "keypoints": 0,
+      "license": "Apache-2.0",
+      "files": [{ "name": "rtmdet-nano.onnx", "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmdet_nano_8xb32-100e_coco-obj365-person-05d8511e.zip", "zip_member": "end2end.onnx" }],
+      "conversion": "нет (ONNX из onnx_sdk OpenMMLab, экспорт MMDeploy с NMS в графе)"
+    },
+    {
+      "id": "rtmpose-t", "family": "rtmpose", "variant": "t", "role": "browser",
+      "runtime": "onnxruntime-web", "input_size": "256x192", "keypoints": 17, "detector": "rtmdet-nano",
+      "license": "Apache-2.0",
+      "weights_note": "body7 (обучение на 7 датасетах, вкл. COCO); официального ONNX для варианта только-COCO в onnx_sdk нет",
+      "files": [{ "name": "rtmpose-t.onnx", "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-t_simcc-body7_pt-body7_420e-256x192-026a1439_20230504.zip", "zip_member": "end2end.onnx" }],
+      "conversion": "нет (ONNX из onnx_sdk OpenMMLab)"
+    },
+    {
+      "id": "rtmpose-s", "family": "rtmpose", "variant": "s", "role": "browser",
+      "runtime": "onnxruntime-web", "input_size": "256x192", "keypoints": 17, "detector": "rtmdet-nano",
+      "license": "Apache-2.0",
+      "weights_note": "body7",
+      "files": [{ "name": "rtmpose-s.onnx", "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-s_simcc-body7_pt-body7_420e-256x192-acd4a1ef_20230504.zip", "zip_member": "end2end.onnx" }],
+      "conversion": "нет (ONNX из onnx_sdk OpenMMLab)"
+    },
+    {
+      "id": "rtmo-s", "family": "rtmo", "variant": "s", "role": "browser",
+      "runtime": "onnxruntime-web", "input_size": "640x640", "keypoints": 17,
+      "license": "Apache-2.0",
+      "weights_note": "body7",
+      "files": [{ "name": "rtmo-s.onnx", "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmo/onnx_sdk/rtmo-s_8xb32-600e_body7-640x640-dac2bf74_20231211.zip", "zip_member": "end2end.onnx" }],
+      "conversion": "нет (ONNX из onnx_sdk OpenMMLab)"
+    },
+    {
+      "id": "yolov8n-pose", "family": "yolo", "variant": "v8n", "role": "browser",
+      "runtime": "onnxruntime-web", "input_size": "640x640", "keypoints": 17,
+      "license": "AGPL-3.0",
+      "files": [{ "name": "yolov8n-pose.pt", "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt" }],
+      "export": { "format": "onnx", "imgsz": 640, "opset": 17, "simplify": true, "dynamic": false, "nms": false, "out": "yolov8n-pose.onnx" },
+      "conversion": "ultralytics export format=onnx imgsz=640 opset=17 simplify (версия ultralytics — в manifest.lock.json)"
+    },
+    {
+      "id": "yolo11n-pose", "family": "yolo", "variant": "11n", "role": "browser",
+      "runtime": "onnxruntime-web", "input_size": "640x640", "keypoints": 17,
+      "license": "AGPL-3.0",
+      "files": [{ "name": "yolo11n-pose.pt", "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n-pose.pt" }],
+      "export": { "format": "onnx", "imgsz": 640, "opset": 17, "simplify": true, "dynamic": false, "nms": false, "out": "yolo11n-pose.onnx" },
+      "conversion": "ultralytics export format=onnx imgsz=640 opset=17 simplify (версия ultralytics — в manifest.lock.json)"
+    },
+    {
+      "id": "ref-yolox-m", "family": "yolox", "variant": "m-humanart", "role": "reference",
+      "runtime": "onnxruntime", "input_size": "640x640", "keypoints": 0,
+      "license": "Apache-2.0",
+      "files": [{ "name": "yolox-m.onnx", "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/yolox_m_8xb8-300e_humanart-c2c7a14a.zip", "zip_member": "end2end.onnx" }],
+      "conversion": "нет"
+    },
+    {
+      "id": "ref-rtmpose-x", "family": "rtmpose", "variant": "x", "role": "reference",
+      "runtime": "onnxruntime", "input_size": "384x288", "keypoints": 17, "detector": "ref-yolox-m",
+      "license": "Apache-2.0",
+      "weights_note": "body7; эталонная модель для своих видео (не ground truth)",
+      "files": [{ "name": "rtmpose-x.onnx", "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-x_simcc-body7_pt-body7_700e-384x288-71d7b7e9_20230629.zip", "zip_member": "end2end.onnx" }],
+      "conversion": "нет"
+    }
+  ]
+}

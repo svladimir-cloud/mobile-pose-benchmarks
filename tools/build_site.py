@@ -48,6 +48,12 @@ def main() -> None:
         shutil.copytree(media_src, out / "media", ignore=shutil.ignore_patterns("*.avi", "*.mkv", ".gitkeep"))
         media = [m for m in media if (out / m["url"]).exists()]
 
+    # страница стенда v1 по прежнему адресу (ссылка из docs/phone_quickstart.md)
+    legacy = ROOT / "bench" / "phone" / "dist" / "phone.html"
+    if legacy.exists():
+        (out / "bench" / "phone" / "dist").mkdir(parents=True, exist_ok=True)
+        shutil.copy2(legacy, out / "bench" / "phone" / "dist" / "phone.html")
+
     cfg = {"models": models, "media": media, "coco": {"count": 0, "items": []},
            "results_endpoint": a.results_endpoint or None, "static": True}
     (out / "config.json").write_text(json.dumps(cfg, ensure_ascii=False), encoding="utf-8")
